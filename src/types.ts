@@ -1,15 +1,20 @@
-import type { IFetchComponent } from "@well-known-components/http-server"
+import type { IFetchComponent, WebSocketServer } from '@well-known-components/http-server'
 import type {
   IConfigComponent,
   ILoggerComponent,
   IHttpServerComponent,
   IBaseComponent,
-  IMetricsComponent,
-} from "@well-known-components/interfaces"
-import { metricDeclarations } from "./metrics"
+  IMetricsComponent
+} from '@well-known-components/interfaces'
+import { metricDeclarations } from './metrics'
+import { WebSocket } from 'ws'
 
 export type GlobalContext = {
   components: BaseComponents
+}
+
+export type WebSocketComponent = IBaseComponent & {
+  ws: WebSocketServer
 }
 
 // components used in every environment
@@ -19,6 +24,7 @@ export type BaseComponents = {
   server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
+  ws: WebSocketComponent
 }
 
 // components used in runtime
@@ -30,6 +36,10 @@ export type AppComponents = BaseComponents & {
 export type TestComponents = BaseComponents & {
   // A fetch component that only hits the test server
   localFetch: IFetchComponent
+}
+
+export type IWsTestComponent = {
+  createWs(relativeUrl: string): WebSocket
 }
 
 // this type simplifies the typings of http handlers
