@@ -17,6 +17,14 @@ function getConnectionsList(roomId: string): Set<WebSocket> {
   return set
 }
 
+function getConnectionsCount(): number {
+  let count = 0
+  connectionsPerRoom.forEach((connections) => {
+    count += connections.size
+  })
+
+  return count
+}
 let connectionCounter = 0
 
 const aliasToUserId = new Map<number, string>()
@@ -37,13 +45,12 @@ export async function websocketRoomHandler(
   }
 
   return upgradeWebSocketResponse((socket) => {
-    metrics.increment('dcl_ws_rooms_connections')
-
     logger.info('Websocket connected')
     let isAlive = true
     // TODO fix ws types
     const ws = socket as any as WebSocket
     connections.add(ws)
+    metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
 
     ws.on('pong', () => {
       isAlive = true
@@ -148,7 +155,7 @@ export async function websocketRoomHandler(
 
     ws.on('close', () => {
       logger.debug('Websocket closed')
-      metrics.decrement('dcl_ws_rooms_connections')
+      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
       clearInterval(pingInterval)
       connections.delete(ws)
     })
