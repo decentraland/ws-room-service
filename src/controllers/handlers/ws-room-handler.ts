@@ -59,10 +59,6 @@ export async function websocketRoomHandler(
       ws.ping()
     }, 30000)
 
-    ws.on('close', () => {
-      clearInterval(pingInterval)
-    })
-
     const alias = ++connectionCounter
 
     const query = context.url.searchParams
@@ -76,11 +72,21 @@ export async function websocketRoomHandler(
     } catch (err) {
       logger.error(err as Error)
       ws.close()
-      metrics.decrement('dcl_ws_rooms_connections')
       return
     }
 
     aliasToUserId.set(alias, userId)
+
+    const broadcast = (payload: Uint8Array) => {
+      // Reliable/unreliable data
+      connections.forEach(($) => {
+        if (ws !== $) {
+          $.send(payload)
+          metrics.increment('dcl_ws_rooms_out_messages')
+          metrics.increment('dcl_ws_rooms_out_bytes', {}, payload.byteLength)
+        }
+      })
+    }
 
     ws.on('message', (rawMessage: Buffer) => {
       metrics.increment('dcl_ws_rooms_in_messages')
@@ -111,12 +117,7 @@ export async function websocketRoomHandler(
             }
           }).finish()
 
-          // Reliable/unreliable data
-          connections.forEach(($) => {
-            if (ws !== $) {
-              $.send(d)
-            }
-          })
+          broadcast(d)
           break
         }
         case 'identityMessage': {
@@ -131,14 +132,7 @@ export async function websocketRoomHandler(
             }
           }).finish()
 
-          // Reliable/unreliable data
-          connections.forEach(($) => {
-            if (ws !== $) {
-              $.send(d)
-              metrics.increment('dcl_ws_rooms_out_messages')
-              metrics.increment('dcl_ws_rooms_out_bytes', {}, d.byteLength)
-            }
-          })
+          broadcast(d)
           break
         }
         default: {
@@ -150,20 +144,13 @@ export async function websocketRoomHandler(
     ws.on('error', (error) => {
       logger.error(error)
       ws.close()
-      metrics.decrement('dcl_ws_rooms_connections')
-      const room = connectionsPerRoom.get(roomId)
-      if (room) {
-        room.delete(ws)
-      }
     })
 
     ws.on('close', () => {
+      logger.debug('Websocket closed')
       metrics.decrement('dcl_ws_rooms_connections')
-      logger.info('Websocket closed')
-      const room = connectionsPerRoom.get(roomId)
-      if (room) {
-        room.delete(ws)
-      }
+      clearInterval(pingInterval)
+      connections.delete(ws)
     })
   })
 }

@@ -35,5 +35,8 @@
     "jsonwebtoken": "^8.5.1",
     "ts-proto": "^1.115.5",
     "ws": "^8.8.0"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.6"
   }
 }
