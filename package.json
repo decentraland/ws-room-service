@@ -6,7 +6,7 @@
     "test": "jest --forceExit --detectOpenHandles --coverage --verbose"
   },
   "devDependencies": {
-    "@dcl/eslint-config": "^1.0.5",
+    "@dcl/eslint-config": "^1.0.6",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "^18.0.0",
     "@types/ws": "^8.5.3",
