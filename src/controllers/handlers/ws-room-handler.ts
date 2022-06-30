@@ -66,10 +66,19 @@ export async function websocketRoomHandler(
       ws.ping()
     }, 30000)
 
-    const alias = ++connectionCounter
+    ws.on('error', (error) => {
+      logger.error(error)
+      ws.close()
+    })
 
-    const query = context.url.searchParams
-    const token = query.get('access_token') as string
+    ws.on('close', () => {
+      logger.debug('Websocket closed')
+      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
+      clearInterval(pingInterval)
+      connections.delete(ws)
+    })
+
+    const token = context.url.searchParams.get('access_token') as string
 
     let userId: string
     try {
@@ -82,6 +91,7 @@ export async function websocketRoomHandler(
       return
     }
 
+    const alias = ++connectionCounter
     aliasToUserId.set(alias, userId)
 
     const broadcast = (payload: Uint8Array) => {
@@ -146,18 +156,6 @@ export async function websocketRoomHandler(
           logger.log(`ignoring msg with ${$case}`)
         }
       }
-    })
-
-    ws.on('error', (error) => {
-      logger.error(error)
-      ws.close()
-    })
-
-    ws.on('close', () => {
-      logger.debug('Websocket closed')
-      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
-      clearInterval(pingInterval)
-      connections.delete(ws)
     })
   })
 }
