@@ -40,10 +40,28 @@ export async function websocketRoomHandler(
     metrics.increment('dcl_ws_rooms_connections')
 
     logger.info('Websocket connected')
+    let isAlive = true
     // TODO fix ws types
     const ws = socket as any as WebSocket
-
     connections.add(ws)
+
+    ws.on('pong', () => {
+      isAlive = true
+    })
+
+    const pingInterval = setInterval(function ping() {
+      if (isAlive === false) {
+        logger.warn(`Terminating ws because of ping timeout`)
+        return ws.terminate()
+      }
+
+      isAlive = false
+      ws.ping()
+    }, 30000)
+
+    ws.on('close', () => {
+      clearInterval(pingInterval)
+    })
 
     const alias = ++connectionCounter
 
