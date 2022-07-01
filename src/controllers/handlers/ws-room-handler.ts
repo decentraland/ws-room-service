@@ -103,12 +103,14 @@ export async function websocketRoomHandler(
 
     const broadcast = (payload: Uint8Array) => {
       // Reliable/unreliable data
-      connections.forEach(($) => {
-        if (ws !== $) {
-          $.send(payload)
-          metrics.increment('dcl_ws_rooms_out_messages')
-          metrics.increment('dcl_ws_rooms_out_bytes', {}, payload.byteLength)
-        }
+      setImmediate(() => {
+        connections.forEach(($) => {
+          if (ws !== $) {
+            $.send(payload)
+            metrics.increment('dcl_ws_rooms_out_messages')
+            metrics.increment('dcl_ws_rooms_out_bytes', {}, payload.byteLength)
+          }
+        })
       })
     }
 
