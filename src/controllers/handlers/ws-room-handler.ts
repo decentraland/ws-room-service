@@ -73,9 +73,9 @@ export async function websocketRoomHandler(
 
     ws.on('close', () => {
       logger.debug('Websocket closed')
-      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
       clearInterval(pingInterval)
       connections.delete(ws)
+      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
     })
 
     const token = context.url.searchParams.get('access_token') as string
