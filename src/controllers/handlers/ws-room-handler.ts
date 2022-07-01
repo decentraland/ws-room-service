@@ -17,14 +17,21 @@ function getConnectionsList(roomId: string): Set<WebSocket> {
   return set
 }
 
-function getConnectionsCount(): number {
-  let count = 0
+function reportStatus(context: IHttpServerComponent.DefaultContext<GlobalContext>): void {
+  const metrics = context.components.metrics
+  let roomsCount = 0
+  let connectionsCount = 0
   connectionsPerRoom.forEach((connections) => {
-    count += connections.size
+    connectionsCount += connections.size
+    if (connections.size) {
+      roomsCount += 1
+    }
   })
 
-  return count
+  metrics.observe('dcl_ws_rooms_connections', {}, connectionsCount)
+  metrics.observe('dcl_ws_rooms', {}, roomsCount)
 }
+
 let connectionCounter = 0
 
 const aliasToUserId = new Map<number, string>()
@@ -50,7 +57,7 @@ export async function websocketRoomHandler(
     // TODO fix ws types
     const ws = socket as any as WebSocket
     connections.add(ws)
-    metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
+    reportStatus(context)
 
     ws.on('pong', () => {
       isAlive = true
@@ -75,7 +82,7 @@ export async function websocketRoomHandler(
       logger.debug('Websocket closed')
       clearInterval(pingInterval)
       connections.delete(ws)
-      metrics.observe('dcl_ws_rooms_connections', {}, getConnectionsCount())
+      reportStatus(context)
     })
 
     const token = context.url.searchParams.get('access_token') as string
