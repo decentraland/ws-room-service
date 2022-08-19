@@ -22,15 +22,17 @@ protoc3/bin/protoc:
 	@# move protoc to /usr/local/bin/
 	chmod +x protoc3/bin/protoc
 
-src/proto/ws.ts: protoc3/bin/protoc src/proto/ws.proto
+src/proto/%.gen.ts: protoc3/bin/protoc src/proto/%.proto
 	protoc3/bin/protoc \
 		--plugin=./node_modules/.bin/protoc-gen-ts_proto \
 		--ts_proto_opt=esModuleInterop=true,oneof=unions \
+		--ts_proto_opt=fileSuffix=.gen \
 		--ts_proto_out="$(PWD)/src/proto" \
 		-I="$(PWD)/src/proto" \
-		"$(PWD)/src/proto/ws.proto"
+		"$(PWD)/src/proto/ws.proto" \
+		"$(PWD)/src/proto/archipelago.proto"
 
-build: src/proto/ws.ts
+build: src/proto/ws.gen.ts src/proto/archipelago.gen.ts
 	@rm -rf dist || true
 	@mkdir -p dist
 	@./node_modules/.bin/tsc -p tsconfig.json

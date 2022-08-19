@@ -1,4 +1,5 @@
 import { Lifecycle } from '@well-known-components/interfaces'
+import { createArchipelagoAdapter } from './controllers/archipelago-adapter'
 import { setupRouter } from './controllers/routes'
 import { AppComponents, GlobalContext, TestComponents } from './types'
 
@@ -20,4 +21,7 @@ export async function main(program: Lifecycle.EntryPointParameters<AppComponents
 
   // start ports: db, listeners, synchronizations, etc
   await startComponents()
+
+  const { logs, config } = components
+  await createArchipelagoAdapter({ logs, config })
 }

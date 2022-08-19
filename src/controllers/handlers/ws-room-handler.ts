@@ -2,7 +2,7 @@ import { upgradeWebSocketResponse } from '@well-known-components/http-server/dis
 import { IHttpServerComponent } from '@well-known-components/interfaces'
 import { WebSocket } from 'ws'
 import { GlobalContext } from '../../types'
-import { WsMessage } from '../../proto/ws'
+import { WsMessage } from '../../proto/ws.gen'
 import { verify } from 'jsonwebtoken'
 import { Reader } from 'protobufjs/minimal'
 
