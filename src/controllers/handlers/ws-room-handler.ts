@@ -2,13 +2,18 @@ import { upgradeWebSocketResponse } from '@well-known-components/http-server/dis
 import { IHttpServerComponent } from '@well-known-components/interfaces'
 import { WebSocket } from 'ws'
 import { GlobalContext } from '../../types'
-import { WsMessage } from '../../proto/ws.gen'
+import { WsPacket } from '../../proto/ws.gen'
 import { verify } from 'jsonwebtoken'
 import { Reader } from 'protobufjs/minimal'
 
-const connectionsPerRoom = new Map<string, Set<WebSocket>>()
+type Peer = {
+  ws: WebSocket
+  alias: number
+}
 
-function getConnectionsList(roomId: string): Set<WebSocket> {
+const connectionsPerRoom = new Map<string, Set<Peer>>()
+
+function getConnectionsList(roomId: string): Set<Peer> {
   let set = connectionsPerRoom.get(roomId)
   if (!set) {
     set = new Set()
@@ -34,29 +39,24 @@ function reportStatus(context: IHttpServerComponent.DefaultContext<GlobalContext
 
 let connectionCounter = 0
 
-const aliasToUserId = new Map<number, string>()
+const aliasToIdentity = new Map<number, string>()
 
 export async function websocketRoomHandler(
   context: IHttpServerComponent.DefaultContext<GlobalContext> & IHttpServerComponent.PathAwareContext<GlobalContext>
 ) {
-  const metrics = context.components.metrics
-  const logger = context.components.logs.getLogger('Websocket Room Handler')
+  const { metrics, config, logs } = context.components
+  const logger = logs.getLogger('Websocket Room Handler')
   logger.info('Websocket')
   const roomId = context.params.roomId
   const connections = getConnectionsList(roomId)
 
-  const secret = process.env.WS_ROOM_SERVICE_SECRET
-
-  if (!secret) {
-    throw new Error('Missing ws room service auth secret')
-  }
+  const secret = await config.requireString('WS_ROOM_SERVICE_SECRET')
 
   return upgradeWebSocketResponse((socket) => {
     logger.info('Websocket connected')
     let isAlive = true
     // TODO fix ws types
     const ws = socket as any as WebSocket
-    connections.add(ws)
     reportStatus(context)
 
     ws.on('pong', () => {
@@ -73,6 +73,25 @@ export async function websocketRoomHandler(
       ws.ping()
     }, 30000)
 
+    const token = context.url.searchParams.get('access_token') as string
+
+    let identity: string
+    try {
+      // TODO: validate audience
+      const decodedToken = verify(token, secret) as any
+      identity = decodedToken['peerId'] as string
+    } catch (err) {
+      logger.error(err as Error)
+      ws.close()
+      return
+    }
+
+    const alias = ++connectionCounter
+    aliasToIdentity.set(alias, identity)
+
+    const peer = { ws, alias }
+    connections.add(peer)
+
     ws.on('error', (error) => {
       logger.error(error)
       ws.close()
@@ -81,78 +100,78 @@ export async function websocketRoomHandler(
     ws.on('close', () => {
       logger.debug('Websocket closed')
       clearInterval(pingInterval)
-      connections.delete(ws)
+      connections.delete(peer)
+      aliasToIdentity.delete(alias)
       reportStatus(context)
     })
-
-    const token = context.url.searchParams.get('access_token') as string
-
-    let userId: string
-    try {
-      // TODO: validate audience
-      const decodedToken = verify(token, secret) as any
-      userId = decodedToken['peerId'] as string
-    } catch (err) {
-      logger.error(err as Error)
-      ws.close()
-      return
-    }
-
-    const alias = ++connectionCounter
-    aliasToUserId.set(alias, userId)
 
     const broadcast = (payload: Uint8Array) => {
       // Reliable/unreliable data
       connections.forEach(($) => {
-        if (ws !== $) {
-          $.send(payload)
+        if (peer !== $) {
+          $.ws.send(payload)
           metrics.increment('dcl_ws_rooms_out_messages')
           metrics.increment('dcl_ws_rooms_out_bytes', {}, payload.byteLength)
         }
       })
     }
 
-    ws.on('message', (rawMessage: Buffer) => {
+    const peerIdentities: Record<number, string> = {}
+    for (const peer of connections) {
+      peerIdentities[peer.alias] = aliasToIdentity.get(peer.alias)!
+    }
+
+    ws.send(
+      WsPacket.encode({
+        message: {
+          $case: 'welcomeMessage',
+          welcomeMessage: {
+            alias,
+            peerIdentities
+          }
+        }
+      }).finish()
+    )
+
+    broadcast(
+      WsPacket.encode({
+        message: {
+          $case: 'peerJoinMessage',
+          peerJoinMessage: {
+            alias,
+            identity
+          }
+        }
+      }).finish()
+    )
+
+    ws.on('message', (rawPacket: Buffer) => {
       metrics.increment('dcl_ws_rooms_in_messages')
-      metrics.increment('dcl_ws_rooms_in_bytes', {}, rawMessage.byteLength)
-      let message: WsMessage
+      metrics.increment('dcl_ws_rooms_in_bytes', {}, rawPacket.byteLength)
+      let packet: WsPacket
       try {
-        message = WsMessage.decode(Reader.create(rawMessage))
+        packet = WsPacket.decode(Reader.create(rawPacket))
       } catch (e: any) {
-        logger.error(`cannot process ws message ${e.toString()}`)
+        logger.error(`cannot process ws packet ${e.toString()}`)
         return
       }
 
-      if (!message.data) {
+      if (!packet.message) {
         return
       }
 
-      const { $case } = message.data
+      const { $case } = packet.message
 
       switch ($case) {
-        case 'systemMessage': {
-          const { systemMessage } = message.data
-          systemMessage.fromAlias = alias
+        case 'peerUpdateMessage': {
+          const { peerUpdateMessage } = packet.message
+          peerUpdateMessage.fromAlias = alias
+          peerUpdateMessage.time = Date.now() // TODO
 
-          const d = WsMessage.encode({
-            data: {
-              $case: 'systemMessage',
-              systemMessage
-            }
-          }).finish()
-
-          broadcast(d)
-          break
-        }
-        case 'identityMessage': {
-          const { identityMessage } = message.data
-          identityMessage.fromAlias = alias
-          identityMessage.identity = userId
-
-          const d = WsMessage.encode({
-            data: {
-              $case: 'identityMessage',
-              identityMessage
+          const d = WsPacket.encode({
+            message: {
+              $case: 'peerUpdateMessage',
+              peerUpdateMessage
             }
           }).finish()
 

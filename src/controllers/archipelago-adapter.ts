@@ -1,6 +1,7 @@
 import { WebSocket } from 'ws'
 import { TransportMessage, TransportType } from '../proto/archipelago.gen'
 import { Reader } from 'protobufjs/minimal'
+import { sign } from 'jsonwebtoken'
 
 import { BaseComponents } from '../types'
 
@@ -13,13 +14,18 @@ export async function createArchipelagoAdapter(components: Pick<BaseComponents, 
   const logger = logs.getLogger('Archipelago Adapter')
 
   const registrationURL = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_URL')
-  const baseURL = 'ws://localhost:6000' // TODO
+  const registrationSecret = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_SECRET')
+  const baseURL = await config.requireString('WS_ROOM_SERVICE_URL')
+  const secret = await config.requireString('WS_ROOM_SERVICE_SECRET')
 
   let heartbeatInterval: undefined | NodeJS.Timer = undefined
 
   function connect() {
     logger.info(`Connecting to ${registrationURL}`)
-    const ws = new WebSocket(registrationURL)
+    const registrationAccessToken = sign({}, registrationSecret, {
+      audience: registrationURL
+    })
+    const ws = new WebSocket(`${registrationURL}?access_token=${registrationAccessToken}`)
     ws.on('open', () => {
       logger.info('ws open')
       ws.send(
@@ -56,18 +62,28 @@ export async function createArchipelagoAdapter(components: Pick<BaseComponents, 
       switch (transportMessage.message?.$case) {
         case 'authRequest': {
           const {
-            authRequest: { userId, roomId }
+            authRequest: { requestId, userIds, roomId }
           } = transportMessage.message
 
-          logger.info(`authRequest ${userId} ${roomId}`)
+          logger.info(`authRequest for ${JSON.stringify(userIds)} ${roomId}`)
+
+          const connStrs: Record<string, string> = {}
+          const audience = `${baseURL}/ws-rooms/${roomId}`
+          for (const peerId of userIds) {
+            const accessToken = sign({ peerId }, secret, {
+              audience
+            })
+
+            connStrs[peerId] = `ws-room:${baseURL}/ws-rooms/${roomId}?access_token=${accessToken}`
+          }
+
           ws.send(
             TransportMessage.encode({
               message: {
                 $case: 'authResponse',
                 authResponse: {
-                  userId,
-                  roomId,
-                  connectionString: `${baseURL}/ws-rooms/${roomId}`
+                  requestId,
+                  connStrs
                 }
               }
             }).finish()

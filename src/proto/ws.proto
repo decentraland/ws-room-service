@@ -3,24 +3,25 @@ syntax = "proto3";
 package protocol;
 
 message WsWelcome {
-  uint64 alias = 1;
+  uint32 alias = 1;
+  map<uint32, string> peer_identities = 2;
 }
 
-message WsSystem {
-  uint64 from_alias = 1;
-  bytes body = 2;
-}
-
-message WsIdentity {
-  uint64 from_alias = 1;
+message WsPeerJoin {
+  uint32 alias = 1;
   string identity = 2;
+}
+
+message WsPeerUpdate {
+  uint32 from_alias = 1;
+  double time = 2;
   bytes body = 3;
 }
 
-message WsMessage {
-  oneof data {
-    WsWelcome welcomeMessage = 1;
-    WsSystem systemMessage = 2;
-    WsIdentity identityMessage = 3;
+message WsPacket {
+  oneof message {
+    WsWelcome welcome_message = 1;
+    WsPeerJoin peer_join_message = 2;
+    WsPeerUpdate peer_update_message = 3;
   }
 }
