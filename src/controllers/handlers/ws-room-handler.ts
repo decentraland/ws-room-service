@@ -1,7 +1,6 @@
 import { upgradeWebSocketResponse } from '@well-known-components/http-server/dist/ws'
-import { IHttpServerComponent } from '@well-known-components/interfaces'
 import { WebSocket } from 'ws'
-import { GlobalContext } from '../../types'
+import { AppComponents, HandlerContextWithPath } from '../../types'
 import { WsPacket } from '../../proto/ws.gen'
 import { verify } from 'jsonwebtoken'
 import { Reader } from 'protobufjs/minimal'
@@ -22,8 +21,8 @@ function getConnectionsList(roomId: string): Set<Peer> {
   return set
 }
 
-function reportStatus(context: IHttpServerComponent.DefaultContext<GlobalContext>): void {
-  const metrics = context.components.metrics
+function reportStatus(components: Pick<AppComponents, 'metrics'>): void {
+  const metrics = components.metrics
   let roomsCount = 0
   let connectionsCount = 0
   connectionsPerRoom.forEach((connections) => {
@@ -42,7 +41,10 @@ let connectionCounter = 0
 const aliasToIdentity = new Map<number, string>()
 
 export async function websocketRoomHandler(
-  context: IHttpServerComponent.DefaultContext<GlobalContext> & IHttpServerComponent.PathAwareContext<GlobalContext>
+  context: Pick<
+    HandlerContextWithPath<'metrics' | 'config' | 'logs', '/ws-room/:roomId'>,
+    'url' | 'components' | 'params'
+  >
 ) {
   const { metrics, config, logs } = context.components
   const logger = logs.getLogger('Websocket Room Handler')
@@ -57,7 +59,7 @@ export async function websocketRoomHandler(
     let isAlive = true
     // TODO fix ws types
     const ws = socket as any as WebSocket
-    reportStatus(context)
+    reportStatus(context.components)
 
     ws.on('pong', () => {
       isAlive = true
@@ -102,7 +104,7 @@ export async function websocketRoomHandler(
       clearInterval(pingInterval)
       connections.delete(peer)
       aliasToIdentity.delete(alias)
-      reportStatus(context)
+      reportStatus(context.components)
     })
 
     const broadcast = (payload: Uint8Array) => {
