@@ -166,7 +166,6 @@ export async function websocketRoomHandler(
         case 'peerUpdateMessage': {
           const { peerUpdateMessage } = packet.message
           peerUpdateMessage.fromAlias = alias
-          peerUpdateMessage.time = Date.now() // TODO
 
           const d = WsPacket.encode({
             message: {

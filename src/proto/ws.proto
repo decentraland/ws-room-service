@@ -14,8 +14,7 @@ message WsPeerJoin {
 
 message WsPeerUpdate {
   uint32 from_alias = 1;
-  double time = 2;
-  bytes body = 3;
+  bytes body = 2;
 }
 
 message WsPacket {
