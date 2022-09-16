@@ -5,35 +5,9 @@ import { WsPacket } from '../../proto/ws.gen'
 import { verify } from 'jsonwebtoken'
 import { Reader } from 'protobufjs/minimal'
 
-type Peer = {
-  ws: WebSocket
-  alias: number
-}
-
-const connectionsPerRoom = new Map<string, Set<Peer>>()
-
-function getConnectionsList(roomId: string): Set<Peer> {
-  let set = connectionsPerRoom.get(roomId)
-  if (!set) {
-    set = new Set()
-    connectionsPerRoom.set(roomId, set)
-  }
-  return set
-}
-
-function reportStatus(components: Pick<AppComponents, 'metrics'>): void {
-  const metrics = components.metrics
-  let roomsCount = 0
-  let connectionsCount = 0
-  connectionsPerRoom.forEach((connections) => {
-    connectionsCount += connections.size
-    if (connections.size) {
-      roomsCount += 1
-    }
-  })
-
-  metrics.observe('dcl_ws_rooms_connections', {}, connectionsCount)
-  metrics.observe('dcl_ws_rooms', {}, roomsCount)
+function reportStatus({ metrics, roomsRegistry }: Pick<AppComponents, 'metrics' | 'roomsRegistry'>): void {
+  metrics.observe('dcl_ws_rooms_connections', {}, roomsRegistry.connectionsCount())
+  metrics.observe('dcl_ws_rooms', {}, roomsRegistry.roomsCount())
 }
 
 let connectionCounter = 0
@@ -42,22 +16,20 @@ const aliasToIdentity = new Map<number, string>()
 
 export async function websocketRoomHandler(
   context: Pick<
-    HandlerContextWithPath<'metrics' | 'config' | 'logs', '/ws-room/:roomId'>,
+    HandlerContextWithPath<'metrics' | 'config' | 'logs' | 'roomsRegistry', '/ws-room/:roomId'>,
     'url' | 'components' | 'params'
   >
 ) {
-  const { metrics, config, logs } = context.components
+  const { metrics, config, logs, roomsRegistry } = context.components
   const logger = logs.getLogger('Websocket Room Handler')
   logger.info('Websocket')
   const roomId = context.params.roomId
-  const connections = getConnectionsList(roomId)
 
   const secret = await config.requireString('WS_ROOM_SERVICE_SECRET')
 
   return upgradeWebSocketResponse((socket) => {
     logger.info('Websocket connected')
     let isAlive = true
-    // TODO fix ws types
     const ws = socket as any as WebSocket
     reportStatus(context.components)
 
@@ -79,9 +51,11 @@ export async function websocketRoomHandler(
 
     let identity: string
     try {
-      // TODO: validate audience
       const decodedToken = verify(token, secret) as any
       identity = decodedToken['peerId'] as string
+      const audience = decodedToken['audience'] as string
+      // TODO: validate audience
+      console.log(audience)
     } catch (err) {
       logger.error(err as Error)
       ws.close()
@@ -92,7 +66,7 @@ export async function websocketRoomHandler(
     aliasToIdentity.set(alias, identity)
 
     const peer = { ws, alias }
-    connections.add(peer)
+    roomsRegistry.addPeer(roomId, peer)
 
     ws.on('error', (error) => {
       logger.error(error)
@@ -102,14 +76,14 @@ export async function websocketRoomHandler(
     ws.on('close', () => {
       logger.debug('Websocket closed')
       clearInterval(pingInterval)
-      connections.delete(peer)
+      roomsRegistry.removePeer(roomId, peer)
       aliasToIdentity.delete(alias)
       reportStatus(context.components)
     })
 
     const broadcast = (payload: Uint8Array) => {
       // Reliable/unreliable data
-      connections.forEach(($) => {
+      roomsRegistry.getPeers(roomId).forEach(($) => {
         if (peer !== $) {
           $.ws.send(payload)
           metrics.increment('dcl_ws_rooms_out_messages')
@@ -119,7 +93,7 @@ export async function websocketRoomHandler(
     }
 
     const peerIdentities: Record<number, string> = {}
-    for (const peer of connections) {
+    for (const peer of roomsRegistry.getPeers(roomId)) {
       peerIdentities[peer.alias] = aliasToIdentity.get(peer.alias)!
     }
 
