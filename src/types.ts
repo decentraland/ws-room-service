@@ -9,7 +9,6 @@ import type {
 import { metricDeclarations } from './metrics'
 import { WebSocket } from 'ws'
 import { IWebSocketConnectorComponent } from './ports/ws-connector'
-import { IRoomsRegistryComponent } from './ports/connections-registry'
 import { RoomComponent } from './adapters/rooms'
 
 export type GlobalContext = {

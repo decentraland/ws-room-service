@@ -13,7 +13,9 @@ import {
   TransportType
 } from '../../src/proto/archipelago.gen'
 import { future } from 'fp-future'
-import { createRoomsRegistryComponent } from '../../src/ports/connections-registry'
+import { createRoomsComponent } from '../../src/adapters/rooms'
+import { createTestMetricsComponent } from '@well-known-components/metrics'
+import { metricDeclarations } from '../../src/metrics'
 
 describe('archipelago-adapter', () => {
   it('ok', async () => {
@@ -55,8 +57,9 @@ describe('archipelago-adapter', () => {
       }
     }
 
-    const roomsRegistry = createRoomsRegistryComponent()
-    await createArchipelagoAdapter({ logs, config, wsConnector, roomsRegistry })
+    const metrics = createTestMetricsComponent(metricDeclarations)
+    const rooms = createRoomsComponent({ logs, metrics })
+    await createArchipelagoAdapter({ logs, config, wsConnector, rooms })
 
     expect((await init).type).toBe(TransportType.TRANSPORT_WS)
     expect((await init).maxIslandSize).toBe(100)

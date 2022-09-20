@@ -7,7 +7,6 @@ import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
 import { createWsComponent } from './ports/ws'
 import { createWsConnectorComponent } from './ports/ws-connector'
-import { createRoomsRegistryComponent } from './ports/connections-registry'
 import { createRoomsComponent } from './adapters/rooms'
 
 // Initialize all the components of the app
