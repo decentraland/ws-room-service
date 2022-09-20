@@ -10,6 +10,7 @@ import { metricDeclarations } from './metrics'
 import { WebSocket } from 'ws'
 import { IWebSocketConnectorComponent } from './ports/ws-connector'
 import { IRoomsRegistryComponent } from './ports/connections-registry'
+import { RoomComponent } from './adapters/rooms'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -28,7 +29,7 @@ export type BaseComponents = {
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   ws: WebSocketComponent
   wsConnector: IWebSocketConnectorComponent
-  roomsRegistry: IRoomsRegistryComponent
+  rooms: RoomComponent
 }
 
 // components used in runtime

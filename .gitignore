@@ -6,4 +6,4 @@ coverage
 protoc3
 .env
 
-src/proto/*.gen.ts
+src/proto

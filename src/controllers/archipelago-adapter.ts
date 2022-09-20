@@ -13,8 +13,8 @@ export async function createArchipelagoAdapter({
   config,
   logs,
   wsConnector,
-  roomsRegistry
-}: Pick<BaseComponents, 'logs' | 'config' | 'wsConnector' | 'roomsRegistry'>) {
+  rooms
+}: Pick<BaseComponents, 'logs' | 'config' | 'wsConnector' | 'rooms'>) {
   const logger = logs.getLogger('Archipelago Adapter')
 
   const registrationURL = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_URL')
@@ -95,7 +95,7 @@ export async function createArchipelagoAdapter({
       }).finish()
     )
 
-    const usersCount = roomsRegistry.connectionsCount()
+    const usersCount = rooms.connectionsCount()
 
     function sendHeartbeat() {
       ws.send(

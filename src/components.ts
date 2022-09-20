@@ -8,6 +8,7 @@ import { metricDeclarations } from './metrics'
 import { createWsComponent } from './ports/ws'
 import { createWsConnectorComponent } from './ports/ws-connector'
 import { createRoomsRegistryComponent } from './ports/connections-registry'
+import { createRoomsComponent } from './adapters/rooms'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -25,9 +26,9 @@ export async function initComponents(): Promise<AppComponents> {
   )
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetch = await createFetchComponent()
-  const metrics = await createMetricsComponent(metricDeclarations, { server, config })
+  const metrics = await createMetricsComponent(metricDeclarations, { config })
   const wsConnector = createWsConnectorComponent({ logs })
-  const roomsRegistry = createRoomsRegistryComponent()
+  const rooms = createRoomsComponent({ logs, metrics })
 
   return {
     config,
@@ -38,6 +39,6 @@ export async function initComponents(): Promise<AppComponents> {
     ws,
     metrics,
     wsConnector,
-    roomsRegistry
+    rooms
   }
 }
