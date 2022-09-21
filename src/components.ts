@@ -2,7 +2,7 @@ import { createDotEnvConfigComponent } from '@well-known-components/env-config-p
 import { createServerComponent, createStatusCheckComponent } from '@well-known-components/http-server'
 import { createLogComponent } from '@well-known-components/logger'
 import { createFetchComponent } from './ports/fetch'
-import { createMetricsComponent } from '@well-known-components/metrics'
+import { createMetricsComponent, instrumentHttpServerWithMetrics } from '@well-known-components/metrics'
 import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
 import { createWsComponent } from './ports/ws'
@@ -28,6 +28,7 @@ export async function initComponents(): Promise<AppComponents> {
   const metrics = await createMetricsComponent(metricDeclarations, { config })
   const wsConnector = createWsConnectorComponent({ logs })
   const rooms = createRoomsComponent({ logs, metrics })
+  await instrumentHttpServerWithMetrics({ metrics, config, server })
 
   return {
     config,
