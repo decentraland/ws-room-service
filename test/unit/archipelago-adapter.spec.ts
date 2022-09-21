@@ -19,7 +19,7 @@ import { metricDeclarations } from '../../src/metrics'
 
 describe('archipelago-adapter', () => {
   it('ok', async () => {
-    const logs = createLogComponent()
+    const logs = await createLogComponent({})
     const config = createConfigComponent({
       ARCHIPELAGO_TRANSPORT_REGISTRATION_URL: 'ws://archipelago',
       ARCHIPELAGO_TRANSPORT_REGISTRATION_SECRET: '123456',
