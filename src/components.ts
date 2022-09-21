@@ -6,6 +6,8 @@ import { createMetricsComponent } from '@well-known-components/metrics'
 import { AppComponents, GlobalContext } from './types'
 import { metricDeclarations } from './metrics'
 import { createWsComponent } from './ports/ws'
+import { createWsConnectorComponent } from './ports/ws-connector'
+import { createRoomsComponent } from './adapters/rooms'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
@@ -23,7 +25,9 @@ export async function initComponents(): Promise<AppComponents> {
   )
   const statusChecks = await createStatusCheckComponent({ server, config })
   const fetch = await createFetchComponent()
-  const metrics = await createMetricsComponent(metricDeclarations, { server, config })
+  const metrics = await createMetricsComponent(metricDeclarations, { config })
+  const wsConnector = createWsConnectorComponent({ logs })
+  const rooms = createRoomsComponent({ logs, metrics })
 
   return {
     config,
@@ -32,6 +36,8 @@ export async function initComponents(): Promise<AppComponents> {
     statusChecks,
     fetch,
     ws,
-    metrics
+    metrics,
+    wsConnector,
+    rooms
   }
 }

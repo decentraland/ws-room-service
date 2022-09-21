@@ -8,6 +8,8 @@ import type {
 } from '@well-known-components/interfaces'
 import { metricDeclarations } from './metrics'
 import { WebSocket } from 'ws'
+import { IWebSocketConnectorComponent } from './ports/ws-connector'
+import { RoomComponent } from './adapters/rooms'
 
 export type GlobalContext = {
   components: BaseComponents
@@ -25,6 +27,8 @@ export type BaseComponents = {
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
   ws: WebSocketComponent
+  wsConnector: IWebSocketConnectorComponent
+  rooms: RoomComponent
 }
 
 // components used in runtime
@@ -36,6 +40,7 @@ export type AppComponents = BaseComponents & {
 export type TestComponents = BaseComponents & {
   // A fetch component that only hits the test server
   localFetch: IFetchComponent
+  createLocalWebSocket: IWsTestComponent
 }
 
 export type IWsTestComponent = {
@@ -54,3 +59,8 @@ export type HandlerContextWithPath<
 >
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
+
+export type Peer = {
+  ws: WebSocket
+  alias: number
+}
