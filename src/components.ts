@@ -13,7 +13,7 @@ import { createRoomsComponent } from './adapters/rooms'
 export async function initComponents(): Promise<AppComponents> {
   const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
 
-  const logs = createLogComponent()
+  const logs = await createLogComponent({})
   const ws = await createWsComponent({ logs })
   const server = await createServerComponent<GlobalContext>(
     { config, logs, ws: ws.ws },
