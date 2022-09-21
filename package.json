@@ -41,7 +41,7 @@
     "@well-known-components/metrics": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "ts-proto": "^1.126.0",
-    "ws": "^8.8.0"
+    "ws": "^8.8.1"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.6"
