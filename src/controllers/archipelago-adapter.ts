@@ -7,7 +7,7 @@ import { BaseComponents } from '../types'
 const HEARTBEAT_INTERVAL_MS = 10 * 1000 // 10sec
 const RETRY_MS = 1000 // 1sec
 
-const MAX_USERS = 150
+const DEFAULT_MAX_USERS = 150
 
 export async function createArchipelagoAdapter({
   config,
@@ -21,6 +21,7 @@ export async function createArchipelagoAdapter({
   const registrationSecret = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_SECRET')
   const baseURL = await config.requireString('WS_ROOM_SERVICE_URL')
   const secret = await config.requireString('WS_ROOM_SERVICE_SECRET')
+  const maxUsers = (await config.getNumber('MAX_USERS')) || DEFAULT_MAX_USERS
 
   let heartbeatInterval: undefined | NodeJS.Timer = undefined
 
@@ -37,7 +38,7 @@ export async function createArchipelagoAdapter({
           logger.info(`authRequest for ${JSON.stringify(userIds)} ${roomId}`)
 
           const connStrs: Record<string, string> = {}
-          const url = `${baseURL}/ws-rooms/${roomId}`
+          const url = `${baseURL}/rooms/${roomId}`
           for (const peerId of userIds) {
             const accessToken = sign({ peerId }, secret, {
               audience: url
@@ -103,7 +104,7 @@ export async function createArchipelagoAdapter({
           message: {
             $case: 'heartbeat',
             heartbeat: {
-              availableSeats: MAX_USERS - usersCount,
+              availableSeats: maxUsers - usersCount,
               usersCount: usersCount
             }
           }

@@ -60,6 +60,6 @@ export async function websocketRoomHandler(
       clearInterval(pingInterval)
     })
 
-    rooms.addSocketToRoom(ws, identity, roomId)
+    rooms.addSocketToRoom(ws, identity.toLowerCase(), roomId)
   })
 }

@@ -7,6 +7,7 @@ import { main } from '../src/service'
 import { TestComponents } from '../src/types'
 import { initComponents as originalInitComponents } from '../src/components'
 import { CloseHandler, MessageHandler } from '../src/ports/ws-connector'
+import { WebSocket } from 'ws'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -19,6 +20,21 @@ export const test = createRunner<TestComponents>({
   main,
   initComponents
 })
+
+async function createTestWsComponent(
+  components: Pick<TestComponents, 'config'>
+): Promise<TestComponents['createLocalWebSocket']> {
+  const protocolHostAndProtocol = `ws://${await components.config.requireString(
+    'HTTP_SERVER_HOST'
+  )}:${await components.config.requireNumber('HTTP_SERVER_PORT')}`
+
+  return {
+    createWs(relativeUrl: string) {
+      const url = new URL(relativeUrl, protocolHostAndProtocol).toString()
+      return new WebSocket(url)
+    }
+  }
+}
 
 async function initComponents(): Promise<TestComponents> {
   const components = await originalInitComponents()
@@ -35,6 +51,7 @@ async function initComponents(): Promise<TestComponents> {
   return {
     ...components,
     wsConnector,
-    localFetch: await createLocalFetchCompoment(config)
+    localFetch: await createLocalFetchCompoment(config),
+    createLocalWebSocket: await createTestWsComponent({ config })
   }
 }

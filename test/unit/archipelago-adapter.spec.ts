@@ -79,8 +79,8 @@ describe('archipelago-adapter', () => {
 
     const { requestId, connStrs } = await authResponse
     expect(requestId).toEqual('request1')
-    expect(connStrs.user1).toEqual(expect.stringContaining('ws-room:ws://ws-room-service/ws-rooms/I1?access_token='))
-    expect(connStrs.user2).toEqual(expect.stringContaining('ws-room:ws://ws-room-service/ws-rooms/I1?access_token='))
+    expect(connStrs.user1).toEqual(expect.stringContaining('ws-room:ws://ws-room-service/rooms/I1?access_token='))
+    expect(connStrs.user2).toEqual(expect.stringContaining('ws-room:ws://ws-room-service/rooms/I1?access_token='))
 
     expect((await heartbeat).availableSeats).toEqual(150)
     expect((await heartbeat).usersCount).toEqual(0)
