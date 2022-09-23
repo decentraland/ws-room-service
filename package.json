@@ -27,7 +27,7 @@
     "tabWidth": 2
   },
   "dependencies": {
-    "@dcl/protocol": "^1.0.0-3091042060.commit-417e01c",
+    "@dcl/protocol": "^1.0.0-3108096922.commit-054e396",
     "@well-known-components/env-config-provider": "^1.1.1",
     "@well-known-components/http-server": "^1.1.4",
     "@well-known-components/interfaces": "^1.1.2",
