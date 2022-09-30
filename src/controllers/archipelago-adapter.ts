@@ -1,8 +1,8 @@
 import { TransportMessage, TransportType } from '../proto/archipelago.gen'
-import { Reader } from 'protobufjs/minimal'
 import { sign } from 'jsonwebtoken'
 
 import { BaseComponents } from '../types'
+import { craftTransportMessage } from '../logic/craft-message'
 
 const HEARTBEAT_INTERVAL_MS = 10 * 1000 // 10sec
 const RETRY_MS = 1000 // 1sec
@@ -17,7 +17,12 @@ export async function createArchipelagoAdapter({
 }: Pick<BaseComponents, 'logs' | 'config' | 'wsConnector' | 'rooms'>) {
   const logger = logs.getLogger('Archipelago Adapter')
 
-  const registrationURL = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_URL')
+  const registrationURL = await config.getString('ARCHIPELAGO_TRANSPORT_REGISTRATION_URL')
+  if (!registrationURL) {
+    logger.debug(`No registration URL is defined, this transport won't register itself`)
+    return
+  }
+
   const registrationSecret = await config.requireString('ARCHIPELAGO_TRANSPORT_REGISTRATION_SECRET')
   const baseURL = await config.requireString('WS_ROOM_SERVICE_URL')
   const secret = await config.requireString('WS_ROOM_SERVICE_SECRET')
@@ -27,7 +32,7 @@ export async function createArchipelagoAdapter({
 
   async function connect() {
     const onMessage = (message: Uint8Array) => {
-      const transportMessage = TransportMessage.decode(Reader.create(message as Buffer))
+      const transportMessage = TransportMessage.decode(Buffer.from(message))
 
       switch (transportMessage.message?.$case) {
         case 'authRequest': {
@@ -48,7 +53,7 @@ export async function createArchipelagoAdapter({
           }
 
           ws.send(
-            TransportMessage.encode({
+            craftTransportMessage({
               message: {
                 $case: 'authResponse',
                 authResponse: {
@@ -56,7 +61,7 @@ export async function createArchipelagoAdapter({
                   connStrs
                 }
               }
-            }).finish()
+            })
           )
           break
         }
@@ -85,7 +90,7 @@ export async function createArchipelagoAdapter({
 
     logger.info('is open')
     ws.send(
-      TransportMessage.encode({
+      craftTransportMessage({
         message: {
           $case: 'init',
           init: {
@@ -93,14 +98,14 @@ export async function createArchipelagoAdapter({
             maxIslandSize: 100
           }
         }
-      }).finish()
+      })
     )
 
     const usersCount = rooms.connectionsCount()
 
     function sendHeartbeat() {
       ws.send(
-        TransportMessage.encode({
+        craftTransportMessage({
           message: {
             $case: 'heartbeat',
             heartbeat: {
@@ -108,7 +113,7 @@ export async function createArchipelagoAdapter({
               usersCount: usersCount
             }
           }
-        }).finish()
+        })
       )
     }
 
