@@ -33,6 +33,11 @@ export const metricDeclarations = {
   dcl_ws_rooms_out_bytes: {
     help: 'Number of bytes from outgoing messages',
     type: IMetricsComponent.CounterType
+  },
+  ws_room_service_build_info: {
+    help: 'WS room service build info.',
+    type: IMetricsComponent.GaugeType,
+    labelNames: ['commitHash', 'ethNetwork']
   }
 }
 

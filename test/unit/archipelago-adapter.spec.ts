@@ -1,10 +1,7 @@
-// import { createTestMetricsComponent } from '@well-known-components/metrics'
-// import { metricDeclarations } from '../../src/metrics'
-// import { websocketRoomHandler } from '../../src/controllers/handlers/ws-room-handler'
 import { createLogComponent } from '@well-known-components/logger'
 import { createConfigComponent } from '@well-known-components/env-config-provider'
 import { createArchipelagoAdapter } from '../../src/controllers/archipelago-adapter'
-import { CloseHandler, MessageHandler } from '../../src/ports/ws-connector'
+import { CloseHandler, MessageHandler } from '../../src/adapters/ws-connector'
 import {
   TransportAuthorizationResponse,
   TransportHeartbeat,

@@ -1,46 +1,40 @@
-import type { IFetchComponent, WebSocketServer } from '@well-known-components/http-server'
+import { HTTPProvider } from 'eth-connect'
+import type { IFetchComponent } from '@well-known-components/http-server'
 import type {
   IConfigComponent,
   ILoggerComponent,
   IHttpServerComponent,
-  IBaseComponent,
   IMetricsComponent
 } from '@well-known-components/interfaces'
 import { metricDeclarations } from './metrics'
-import { WebSocket } from 'ws'
-import { IWebSocketConnectorComponent } from './ports/ws-connector'
+import { IWebSocketConnectorComponent } from './adapters/ws-connector'
 import { RoomComponent } from './adapters/rooms'
+import * as uWS from 'uWebSockets.js'
+import { Emitter } from 'mitt'
 
 export type GlobalContext = {
+  app: uWS.TemplatedApp
   components: BaseComponents
-}
-
-export type WebSocketComponent = IBaseComponent & {
-  ws: WebSocketServer
 }
 
 // components used in every environment
 export type BaseComponents = {
   config: IConfigComponent
   logs: ILoggerComponent
-  server: IHttpServerComponent<GlobalContext>
   fetch: IFetchComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  ws: WebSocketComponent
   wsConnector: IWebSocketConnectorComponent
   rooms: RoomComponent
+  ethereumProvider: HTTPProvider
 }
 
 // components used in runtime
-export type AppComponents = BaseComponents & {
-  statusChecks: IBaseComponent
-}
+export type AppComponents = BaseComponents
 
 // components used in tests
 export type TestComponents = BaseComponents & {
   // A fetch component that only hits the test server
   localFetch: IFetchComponent
-  createLocalWebSocket: IWsTestComponent
 }
 
 export type IWsTestComponent = {
@@ -60,7 +54,27 @@ export type HandlerContextWithPath<
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
-export type Peer = {
-  ws: WebSocket
-  alias: number
+export enum Stage {
+  LINEAR,
+  READY
 }
+
+export type WsEvents = {
+  message: any
+  error: any
+  close: any
+}
+
+export type WebSocketReader = Pick<uWS.WebSocket, 'end' | 'close'> & Emitter<WsEvents>
+
+export type WebSocket = Pick<uWS.WebSocket, 'subscribe'> &
+  WebSocketReader & {
+    stage: Stage
+    roomId: string
+    address?: string
+    alias: number
+
+    // NOTE(hugo): I prefer to override this ones to make isBinary not default
+    send: (data: Uint8Array, isBinary: boolean) => number
+    publish: (topic: string, data: Uint8Array, isBinary: boolean) => number
+  }
