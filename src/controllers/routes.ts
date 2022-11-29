@@ -1,8 +1,8 @@
 import mitt from 'mitt'
 import { verify } from 'jsonwebtoken'
 import * as uWS from 'uWebSockets.js'
-import { GlobalContext, WebSocket, Stage } from '../types'
-import { WsPacket } from '../proto/ws-comms-rfc-5.gen'
+import { GlobalContext, Stage, WebSocket } from '../types'
+import { WsPacket } from '../proto/ws_comms.gen'
 import { handleSocketLinearProtocol } from '../logic/handle-linear-protocol'
 import { craftMessage } from '../logic/craft-message'
 

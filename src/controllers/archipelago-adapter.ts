@@ -94,7 +94,7 @@ export async function createArchipelagoAdapter({
         message: {
           $case: 'init',
           init: {
-            type: TransportType.TRANSPORT_WS,
+            type: TransportType.TT_WS,
             maxIslandSize: 100
           }
         }

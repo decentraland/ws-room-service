@@ -72,7 +72,7 @@ export async function handleSocketLinearProtocol(
     if (kicked) {
       const room = socket.roomId
       logger.info('Kicking user', { room, address, alias: kicked.alias })
-      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: {} } }), true)
+      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: { reason: 'Already connected' } } }), true)
       kicked.close()
       rooms.removeFromRoom(kicked)
       logger.info('Kicked user', { room, address, alias: kicked.alias })

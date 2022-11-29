@@ -1,5 +1,5 @@
 import { Writer } from 'protobufjs/minimal'
-import { WsPacket } from '../proto/ws-comms-rfc-5.gen'
+import { WsPacket } from '../proto/ws_comms.gen'
 import { TransportMessage } from '../proto/archipelago.gen'
 
 // we use a shared writer to reduce allocations and leverage its allocation pool
