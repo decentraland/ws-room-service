@@ -58,7 +58,7 @@ describe('archipelago-adapter', () => {
     const rooms = createRoomsComponent({ logs, metrics })
     await createArchipelagoAdapter({ logs, config, wsConnector, rooms })
 
-    expect((await init).type).toBe(TransportType.TRANSPORT_WS)
+    expect((await init).type).toBe(TransportType.TT_WS)
     expect((await init).maxIslandSize).toBe(100)
 
     onMessageListener(

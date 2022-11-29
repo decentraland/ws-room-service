@@ -1,4 +1,4 @@
-src/proto/ws-comms-rfc-5.gen.ts: node_modules/@dcl/protocol/proto/decentraland/kernel/comms/rfc5/ws_comms.proto
+src/proto/src/proto/ws_comms.gen.ts: node_modules/@dcl/protocol/proto/decentraland/kernel/comms/rfc5/ws_comms.proto
 	mkdir -p src/proto
 	node_modules/.bin/protoc \
 		--plugin=./node_modules/.bin/protoc-gen-ts_proto \
