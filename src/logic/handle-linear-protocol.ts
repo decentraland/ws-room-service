@@ -38,6 +38,7 @@ export async function handleSocketLinearProtocol(
 
     // Check that the max number of users in a room has not been reached
     if (rooms.getRoomSize(socket.roomId) > maxUsers) {
+      logger.error('Closing connection: kicking user as the room is already at max capacity')
       socket.send(
         craftMessage({
           message: {
@@ -49,6 +50,8 @@ export async function handleSocketLinearProtocol(
         }),
         true
       )
+      socket.close()
+      return
     }
 
     const challengeToSign = 'dcl-' + Math.random().toString(36)
