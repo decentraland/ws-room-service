@@ -4,13 +4,20 @@ import { Authenticator } from '@dcl/crypto'
 import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
 import { craftMessage } from './craft-message'
-
-const MAX_ROOM_CAPACITY = 100
+import { DEFAULT_MAX_USERS } from '../controllers/archipelago-adapter'
 
 export async function handleSocketLinearProtocol(
-  { rooms, logs, ethereumProvider, metrics }: Pick<AppComponents, 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
+  {
+    config,
+    rooms,
+    logs,
+    ethereumProvider,
+    metrics
+  }: Pick<AppComponents, 'config' | 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
   socket: WebSocket
 ) {
+  const maxUsers = (await config.getNumber('MAX_USERS')) || DEFAULT_MAX_USERS
+
   const logger = logs.getLogger('LinearProtocol')
   // Wire the socket to a pushable channel
   const channel = wsAsAsyncChannel(socket)
@@ -29,7 +36,7 @@ export async function handleSocketLinearProtocol(
 
     const address = normalizeAddress(packet.message.peerIdentification.address)
 
-    if (rooms.connectionsCount() > MAX_ROOM_CAPACITY) {
+    if (rooms.connectionsCount() > maxUsers) {
       socket.send(
         craftMessage({
           message: {
