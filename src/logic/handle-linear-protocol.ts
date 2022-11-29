@@ -36,7 +36,8 @@ export async function handleSocketLinearProtocol(
 
     const address = normalizeAddress(packet.message.peerIdentification.address)
 
-    if (rooms.connectionsCount() > maxUsers) {
+    // Check that the max number of users in a room has not been reached
+    if (rooms.getRoom(socket.roomId).size > maxUsers) {
       socket.send(
         craftMessage({
           message: {
