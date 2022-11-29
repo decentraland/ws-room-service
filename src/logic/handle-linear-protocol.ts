@@ -5,6 +5,8 @@ import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
 import { craftMessage } from './craft-message'
 
+const MAX_ROOM_CAPACITY = 100
+
 export async function handleSocketLinearProtocol(
   { rooms, logs, ethereumProvider, metrics }: Pick<AppComponents, 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
   socket: WebSocket
@@ -26,6 +28,20 @@ export async function handleSocketLinearProtocol(
       throw new Error('Invalid protocol. peerIdentification has an invalid address')
 
     const address = normalizeAddress(packet.message.peerIdentification.address)
+
+    if (rooms.connectionsCount() > MAX_ROOM_CAPACITY) {
+      socket.send(
+        craftMessage({
+          message: {
+            $case: 'peerKicked',
+            peerKicked: {
+              reason: 'Room is full. Try again later.'
+            }
+          }
+        }),
+        true
+      )
+    }
 
     const challengeToSign = 'dcl-' + Math.random().toString(36)
     const alreadyConnected = rooms.isAddressConnected(address)
