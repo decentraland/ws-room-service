@@ -39,17 +39,18 @@ export async function handleSocketLinearProtocol(
     // Check that the max number of users in a room has not been reached
     if (rooms.getRoomSize(socket.roomId) >= maxUsers) {
       logger.error('Closing connection: kicking user as the room is already at max capacity')
-      socket.send(
-        craftMessage({
-          message: {
-            $case: 'peerKicked',
-            peerKicked: {
-              reason: 'Room is full. Try again later.'
-            }
+      const kickMessage = craftMessage({
+        message: {
+          $case: 'peerKicked',
+          peerKicked: {
+            reason: 'Room is full. Try again later.'
           }
-        }),
-        true
-      )
+        }
+      })
+      if (socket.send(kickMessage, true) !== 1) {
+        logger.error('Closing connection: cannot send kick message')
+      }
+
       socket.close()
       return
     }
