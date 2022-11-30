@@ -4,11 +4,20 @@ import { Authenticator } from '@dcl/crypto'
 import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
 import { craftMessage } from './craft-message'
+import { DEFAULT_MAX_USERS } from '../controllers/archipelago-adapter'
 
 export async function handleSocketLinearProtocol(
-  { rooms, logs, ethereumProvider, metrics }: Pick<AppComponents, 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
+  {
+    config,
+    rooms,
+    logs,
+    ethereumProvider,
+    metrics
+  }: Pick<AppComponents, 'config' | 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
   socket: WebSocket
 ) {
+  const maxUsers = (await config.getNumber('MAX_USERS')) || DEFAULT_MAX_USERS
+
   const logger = logs.getLogger('LinearProtocol')
   // Wire the socket to a pushable channel
   const channel = wsAsAsyncChannel(socket)
@@ -26,6 +35,25 @@ export async function handleSocketLinearProtocol(
       throw new Error('Invalid protocol. peerIdentification has an invalid address')
 
     const address = normalizeAddress(packet.message.peerIdentification.address)
+
+    // Check that the max number of users in a room has not been reached
+    if (rooms.getRoomSize(socket.roomId) >= maxUsers) {
+      logger.error('Closing connection: kicking user as the room is already at max capacity')
+      const kickMessage = craftMessage({
+        message: {
+          $case: 'peerKicked',
+          peerKicked: {
+            reason: 'This world is full. Try again later.'
+          }
+        }
+      })
+      if (socket.send(kickMessage, true) !== 1) {
+        logger.error('Closing connection: cannot send kick message')
+      }
+
+      socket.end()
+      return
+    }
 
     const challengeToSign = 'dcl-' + Math.random().toString(36)
     const alreadyConnected = rooms.isAddressConnected(address)
@@ -72,7 +100,7 @@ export async function handleSocketLinearProtocol(
     if (kicked) {
       const room = socket.roomId
       logger.info('Kicking user', { room, address, alias: kicked.alias })
-      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: {} } }), true)
+      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: { reason: 'Already connected' } } }), true)
       kicked.close()
       rooms.removeFromRoom(kicked)
       logger.info('Kicked user', { room, address, alias: kicked.alias })

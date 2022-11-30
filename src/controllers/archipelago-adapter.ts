@@ -7,7 +7,7 @@ import { craftTransportMessage } from '../logic/craft-message'
 const HEARTBEAT_INTERVAL_MS = 10 * 1000 // 10sec
 const RETRY_MS = 1000 // 1sec
 
-const DEFAULT_MAX_USERS = 150
+export const DEFAULT_MAX_USERS = 150
 
 export async function createArchipelagoAdapter({
   config,
@@ -94,7 +94,7 @@ export async function createArchipelagoAdapter({
         message: {
           $case: 'init',
           init: {
-            type: TransportType.TRANSPORT_WS,
+            type: TransportType.TT_WS,
             maxIslandSize: 100
           }
         }

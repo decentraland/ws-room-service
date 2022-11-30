@@ -1,4 +1,4 @@
-import { WebSocket, AppComponents } from '../types'
+import { AppComponents, WebSocket } from '../types'
 import { validateMetricsDeclaration } from '@well-known-components/metrics'
 
 export type RoomComponent = {
@@ -8,6 +8,7 @@ export type RoomComponent = {
   isAddressConnected(address: string): boolean
   getSocket(address: string): WebSocket | undefined
   getRoom(room: string): Set<WebSocket>
+  getRoomSize(room: string): number
 }
 
 export const roomsMetrics = validateMetricsDeclaration({
@@ -104,12 +105,17 @@ export function createRoomsComponent(components: Pick<AppComponents, 'logs' | 'm
     return addressToSocket.size
   }
 
+  function getRoomSize(room: string): number {
+    return rooms.get(room)?.size || 0
+  }
+
   return {
     connectionsCount,
     getRoom,
     addSocketToRoom,
     isAddressConnected,
     getSocket,
-    removeFromRoom
+    removeFromRoom,
+    getRoomSize
   }
 }

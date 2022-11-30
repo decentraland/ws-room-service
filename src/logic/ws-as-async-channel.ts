@@ -1,6 +1,6 @@
 import { AsyncQueue } from '@well-known-components/pushable-channel'
 import { WebSocketReader } from '../types'
-import { WsPacket } from '../proto/ws-comms-rfc-5.gen'
+import { WsPacket } from '../proto/ws_comms.gen'
 
 export function wsAsAsyncChannel(socket: WebSocketReader) {
   // Wire the socket to a pushable channel
