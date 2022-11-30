@@ -51,7 +51,7 @@ export async function handleSocketLinearProtocol(
         logger.error('Closing connection: cannot send kick message')
       }
 
-      socket.close()
+      socket.end()
       return
     }
 
