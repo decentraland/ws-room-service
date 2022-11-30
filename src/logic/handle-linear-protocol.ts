@@ -43,7 +43,7 @@ export async function handleSocketLinearProtocol(
         message: {
           $case: 'peerKicked',
           peerKicked: {
-            reason: 'Room is full. Try again later.'
+            reason: 'This world is full. Try again later.'
           }
         }
       })
