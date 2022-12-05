@@ -89,6 +89,8 @@ export async function setupRouter({ app, components }: GlobalContext): Promise<v
           })
       },
       message: (_ws, data, isBinary) => {
+        metrics.increment('dcl_ws_rooms_in_messages', {})
+        metrics.increment('dcl_ws_rooms_in_bytes', {}, data.byteLength)
         if (!isBinary) {
           logger.log('protocol error: data is not binary')
           return
@@ -111,6 +113,10 @@ export async function setupRouter({ app, components }: GlobalContext): Promise<v
             }
 
             const { body, unreliable } = message.peerUpdateMessage
+
+            const subscribers = app.numSubscribers(ws.roomId)
+            metrics.increment('dcl_ws_rooms_out_messages', {}, subscribers)
+            metrics.increment('dcl_ws_rooms_out_bytes', {}, subscribers * data.byteLength)
             ws.publish(
               ws.roomId,
               craftMessage({
