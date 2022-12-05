@@ -10,14 +10,6 @@ export const metricDeclarations = {
     type: IMetricsComponent.CounterType,
     labelNames: ['pathname']
   },
-  dcl_ws_rooms: {
-    help: 'Number of rooms',
-    type: IMetricsComponent.GaugeType
-  },
-  dcl_ws_rooms_connections: {
-    help: 'Number of peer connections',
-    type: IMetricsComponent.GaugeType
-  },
   dcl_ws_rooms_in_messages: {
     help: 'Number of incoming messages',
     type: IMetricsComponent.CounterType
