@@ -40,7 +40,7 @@
     "eth-crypto": "^2.3.0",
     "ethereum-cryptography": "^1.1.2",
     "jsonwebtoken": "^8.5.1",
-    "ts-proto": "^1.126.1",
+    "ts-proto": "^1.135.3",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.10.0",
     "ws": "^8.9.0"
   }
