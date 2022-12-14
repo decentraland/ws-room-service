@@ -25,6 +25,9 @@ RUN make build
 # remove devDependencies, keep only used dependencies
 RUN npm ci --only=production
 
+ARG COMMIT_HASH
+RUN echo "COMMIT_HASH=$COMMIT_HASH" >> .env
+
 ########################## END OF BUILD STAGE ##########################
 
 FROM node:lts
