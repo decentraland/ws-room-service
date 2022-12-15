@@ -5,15 +5,13 @@ import { GlobalContext, Stage, WebSocket } from '../types'
 import { WsPacket } from '../proto/ws_comms.gen'
 import { handleSocketLinearProtocol } from '../logic/handle-linear-protocol'
 import { craftMessage } from '../logic/craft-message'
+import { createStatusHandler } from './handlers/createStatusHandler'
 
 let connectionCounter = 0
 
 export async function setupRouter({ app, components }: GlobalContext): Promise<void> {
   const { logs, metrics, config } = components
   const logger = logs.getLogger('rooms')
-
-  const commitHash = await config.getString('COMMIT_HASH')
-  const status = JSON.stringify({ commitHash })
 
   const secret = await config.getString('WS_ROOM_SERVICE_SECRET')
   if (!secret) {
@@ -42,9 +40,7 @@ export async function setupRouter({ app, components }: GlobalContext): Promise<v
   }
 
   app
-    .get('/status', async (res) => {
-      res.end(status)
-    })
+    .get('/status', await createStatusHandler(components))
     .get('/metrics', async (res) => {
       const body = await (metrics as any).registry.metrics()
       res.end(body)
