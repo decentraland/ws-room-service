@@ -149,7 +149,7 @@ export function createRoomsComponent(
       const subscribers = roomInstance.size
       components.metrics.increment('dcl_ws_rooms_out_messages', {}, subscribers)
       components.metrics.increment('dcl_ws_rooms_out_bytes', {}, subscribers * data.byteLength)
-      broadcast(
+      ws.publish(
         ws.roomId,
         craftMessage({
           message: {
@@ -160,7 +160,8 @@ export function createRoomsComponent(
               unreliable
             }
           }
-        })
+        }),
+        true
       )
     })
 
@@ -197,8 +198,8 @@ export function createRoomsComponent(
         peerJoinMessage: { alias: ws.alias, address }
       }
     })
-    ws.subscribe(ws.roomId)
     broadcast(ws.roomId, joinedMessage)
+    ws.subscribe(ws.roomId)
 
     components.metrics.increment('dcl_ws_rooms_connections_total')
   }

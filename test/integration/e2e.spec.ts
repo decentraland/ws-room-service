@@ -117,12 +117,10 @@ test('end to end test', ({ components }) => {
     ws.close()
   })
 
-  it.only('connects the websocket and authenticates, doing it twice disconnects former connection', async () => {
+  it('connects the websocket and authenticates, doing it twice disconnects former connection', async () => {
     const ws1 = await connectSocket(aliceIdentity, 'testRoom')
     const ws2 = await connectSocket(aliceIdentity, 'testRoom')
 
-
-    
     const ws1DisconnectPromise = futureWithTimeout(1000, 'Socket did not disconnect')
     ws1.on('close', ws1DisconnectPromise.resolve)
 
