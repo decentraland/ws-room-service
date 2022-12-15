@@ -9,8 +9,6 @@ import type {
 import { metricDeclarations } from './metrics'
 import { IWebSocketConnectorComponent } from './adapters/ws-connector'
 import { RoomComponent } from './adapters/rooms'
-import * as uWS from 'uWebSockets.js'
-import { Emitter } from 'mitt'
 import { WsUserData } from '@well-known-components/http-server/dist/uws'
 
 export type GlobalContext = {

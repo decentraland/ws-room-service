@@ -36,7 +36,10 @@ export const roomsMetrics = validateMetricsDeclaration({
   }
 })
 
-export function createRoomsComponent(components: Pick<AppComponents, 'logs' | 'metrics'>, broadcast: (roomId: string, message: Uint8Array) => void): RoomComponent {
+export function createRoomsComponent(
+  components: Pick<AppComponents, 'logs' | 'metrics'>,
+  broadcast: (roomId: string, message: Uint8Array) => void
+): RoomComponent {
   const rooms = new Map<string, Set<InternalWebSocket>>()
   const addressToSocket = new Map<string, InternalWebSocket>()
   const logger = components.logs.getLogger('RoomsComponent')

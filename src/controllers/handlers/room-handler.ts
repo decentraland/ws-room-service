@@ -5,7 +5,10 @@ import { HandlerContextWithPath, InternalWebSocket } from '../../types'
 let connectionCounter = 0
 
 export async function websocketHandler(
-  context: HandlerContextWithPath<'logs' | 'ethereumProvider' | 'rooms' | 'config' | 'server' | 'metrics', '/rooms/:roomId'>
+  context: HandlerContextWithPath<
+    'logs' | 'ethereumProvider' | 'rooms' | 'config' | 'server' | 'metrics',
+    '/rooms/:roomId'
+  >
 ) {
   const logger = context.components.logs.getLogger('Websocket Handler')
 
@@ -27,13 +30,15 @@ export async function websocketHandler(
     ws.alias = ++connectionCounter
     ws.roomId = context.params.roomId
 
-    handleSocketLinearProtocol(context.components, ws).then(() => {
-      context.components.rooms.addSocketToRoom(ws)
-    }).catch((err) => {
-      logger.info(err)
-      try {
-        ws.end()
-      } catch {}
-    })
+    handleSocketLinearProtocol(context.components, ws)
+      .then(() => {
+        context.components.rooms.addSocketToRoom(ws)
+      })
+      .catch((err) => {
+        logger.info(err)
+        try {
+          ws.end()
+        } catch {}
+      })
   })
 }

@@ -11,9 +11,9 @@ export async function handleSocketLinearProtocol(
     config,
     rooms,
     logs,
-    ethereumProvider,
+    ethereumProvider
   }: Pick<AppComponents, 'config' | 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
-  socket: InternalWebSocket,
+  socket: InternalWebSocket
 ) {
   const maxUsers = (await config.getNumber('MAX_USERS')) || DEFAULT_MAX_USERS
 

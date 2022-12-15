@@ -1,6 +1,5 @@
 import { Lifecycle } from '@well-known-components/interfaces'
 import { setupRouter } from './controllers/routes'
-import * as uWS from 'uWebSockets.js'
 import { AppComponents, GlobalContext, TestComponents } from './types'
 import { createArchipelagoAdapter } from './controllers/archipelago-adapter'
 
