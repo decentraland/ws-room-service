@@ -7,9 +7,11 @@ export async function createStatusHandler({
   const commitHash = (await config.getString('COMMIT_HASH')) || 'unknown'
 
   return async (res): Promise<void> => {
-    res.end({
-      commitHash,
-      users: rooms.connectionsCount()
-    })
+    res.end(
+      JSON.stringify({
+        commitHash,
+        users: rooms.connectionsCount()
+      })
+    )
   }
 }
