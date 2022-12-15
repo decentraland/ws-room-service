@@ -11,9 +11,9 @@ import { IWebSocketConnectorComponent } from './adapters/ws-connector'
 import { RoomComponent } from './adapters/rooms'
 import * as uWS from 'uWebSockets.js'
 import { Emitter } from 'mitt'
+import { WsUserData } from '@well-known-components/http-server/dist/uws'
 
 export type GlobalContext = {
-  app: uWS.TemplatedApp
   components: BaseComponents
 }
 
@@ -26,6 +26,7 @@ export type BaseComponents = {
   wsConnector: IWebSocketConnectorComponent
   rooms: RoomComponent
   ethereumProvider: HTTPProvider
+  server: IHttpServerComponent<GlobalContext>
 }
 
 // components used in runtime
@@ -54,27 +55,8 @@ export type HandlerContextWithPath<
 
 export type Context<Path extends string = any> = IHttpServerComponent.PathAwareContext<GlobalContext, Path>
 
-export enum Stage {
-  LINEAR,
-  READY
+export type InternalWebSocket = WsUserData & {
+  address: string
+  alias: number
+  roomId: string
 }
-
-export type WsEvents = {
-  message: any
-  error: any
-  close: any
-}
-
-export type WebSocketReader = Pick<uWS.WebSocket, 'end' | 'close'> & Emitter<WsEvents>
-
-export type WebSocket = Pick<uWS.WebSocket, 'subscribe'> &
-  WebSocketReader & {
-    stage: Stage
-    roomId: string
-    address?: string
-    alias: number
-
-    // NOTE(hugo): I prefer to override this ones to make isBinary not default
-    send: (data: Uint8Array, isBinary: boolean) => number
-    publish: (topic: string, data: Uint8Array, isBinary: boolean) => number
-  }

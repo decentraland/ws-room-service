@@ -1,5 +1,5 @@
 import { EthAddress } from '@dcl/schemas'
-import { AppComponents, WebSocket } from '../types'
+import { AppComponents, InternalWebSocket } from '../types'
 import { Authenticator } from '@dcl/crypto'
 import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
@@ -12,9 +12,8 @@ export async function handleSocketLinearProtocol(
     rooms,
     logs,
     ethereumProvider,
-    metrics
   }: Pick<AppComponents, 'config' | 'rooms' | 'logs' | 'ethereumProvider' | 'metrics'>,
-  socket: WebSocket
+  socket: InternalWebSocket,
 ) {
   const maxUsers = (await config.getNumber('MAX_USERS')) || DEFAULT_MAX_USERS
 
@@ -69,6 +68,7 @@ export async function handleSocketLinearProtocol(
         challengeMessage: { alreadyConnected, challengeToSign }
       }
     })
+
     if (socket.send(challengeMessage, true) !== 1) {
       logger.error('Closing connection: cannot send challenge')
       socket.close()
@@ -88,60 +88,13 @@ export async function handleSocketLinearProtocol(
       ethereumProvider
     )
 
-    if (!result.ok) {
+    if (result.ok) {
+      socket.address = normalizeAddress(address)
+      logger.debug(`Authentication successful`, { address: address })
+    } else {
       logger.error(`Authentication failed`, { message: result.message } as any)
       throw new Error('Authentication failed')
     }
-    logger.debug(`Authentication successful`, { address })
-
-    // disconnect previous session
-    const kicked = rooms.getSocket(address)
-
-    if (kicked) {
-      const room = socket.roomId
-      logger.info('Kicking user', { room, address, alias: kicked.alias })
-      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: { reason: 'Already connected' } } }), true)
-      kicked.close()
-      rooms.removeFromRoom(kicked)
-      logger.info('Kicked user', { room, address, alias: kicked.alias })
-      metrics.increment('dcl_ws_rooms_kicks_total')
-    }
-
-    socket.address = address
-    rooms.addSocketToRoom(socket, address)
-
-    // 1. tell the user about their identity and the neighbouring peers,
-    //    and disconnect other peers if the address is repeated
-    const peerIdentities: Record<number, string> = {}
-    for (const peer of rooms.getRoom(socket.roomId)) {
-      if (peer !== socket && peer.address) {
-        peerIdentities[peer.alias] = peer.address
-      }
-    }
-
-    const welcomeMessage = craftMessage({
-      message: {
-        $case: 'welcomeMessage',
-        welcomeMessage: { alias: socket.alias, peerIdentities }
-      }
-    })
-    if (socket.send(welcomeMessage, true) !== 1) {
-      logger.error('Closing connection: cannot send welcome message')
-      socket.close()
-      return
-    }
-
-    // 2. broadcast to all room that this user is joining them
-    const joinedMessage = craftMessage({
-      message: {
-        $case: 'peerJoinMessage',
-        peerJoinMessage: { alias: socket.alias, address }
-      }
-    })
-    socket.subscribe(socket.roomId)
-    socket.publish(socket.roomId, joinedMessage, true)
-
-    metrics.increment('dcl_ws_rooms_connections_total')
   } finally {
     // close the channel to remove the listener
     channel.close()

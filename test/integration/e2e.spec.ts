@@ -5,16 +5,11 @@ import { future } from 'fp-future'
 import { craftMessage } from '../../src/logic/craft-message'
 import { normalizeAddress } from '../../src/logic/address'
 import { WsChallengeRequired, WsPacket, WsWelcome } from '../../src/proto/ws_comms.gen'
-import { WebSocket as Ws } from 'ws'
+import { WebSocket } from 'ws'
 import { URL } from 'url'
-import { WebSocketReader } from '../../src/types'
-import { Emitter } from 'mitt'
-
-export type WebSocket = WebSocketReader &
-  Emitter<{ open: any }> & {
-    end: () => void
-    send: (message: Uint8Array, cb: (err: any) => void) => void
-  }
+import mitt from 'mitt'
+import { InternalWebSocket } from '../../src/types'
+import { WsEvents } from '@well-known-components/http-server/dist/uws'
 
 function expectPacket<T>(packet: WsPacket, packetType: string): T {
   if (!packet.message || packet.message.$case !== packetType) {
@@ -34,14 +29,33 @@ test('end to end test', ({ components }) => {
       'HTTP_SERVER_HOST'
     )}:${await components.config.requireNumber('HTTP_SERVER_PORT')}`
     const url = new URL(relativeUrl, protocolHostAndProtocol).toString()
-    const ws = new Ws(url) as any
+    const ws = new WebSocket(url) as any
     ws.end = ws.terminate
     return ws
   }
 
+  function adaptSocket(sock: WebSocket): Pick<InternalWebSocket, 'on' | 'off' | 'emit' | 'end'> {
+    const events = mitt<WsEvents>()
+
+    sock.addEventListener('message', evt => {
+      events.emit('message', evt.data as ArrayBuffer)
+    })
+    sock.addEventListener('close', evt => {
+      events.emit('close')
+    })
+    sock.addEventListener('error', evt => {
+      events.emit('error')
+    })
+    sock.addEventListener('open', evt => {
+      events.emit('open')
+    })
+
+    return {...events, end() {sock.close()} }
+  }
+
   async function connectSocket(identity: ReturnType<typeof createEphemeralIdentity>, room: string) {
     const ws = await createWs('/rooms/' + room)
-    const channel = wsAsAsyncChannel(ws)
+    const channel = wsAsAsyncChannel(adaptSocket(ws))
 
     await socketConnected(ws)
     await socketSend(
@@ -103,10 +117,12 @@ test('end to end test', ({ components }) => {
     ws.close()
   })
 
-  it('connects the websocket and authenticates, doing it twice disconnects former connection', async () => {
+  it.only('connects the websocket and authenticates, doing it twice disconnects former connection', async () => {
     const ws1 = await connectSocket(aliceIdentity, 'testRoom')
     const ws2 = await connectSocket(aliceIdentity, 'testRoom')
 
+
+    
     const ws1DisconnectPromise = futureWithTimeout(1000, 'Socket did not disconnect')
     ws1.on('close', ws1DisconnectPromise.resolve)
 
