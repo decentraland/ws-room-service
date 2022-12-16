@@ -6,6 +6,9 @@ export async function statusHandler({
   const commitHash = (await config.getString('COMMIT_HASH')) || 'unknown'
 
   return {
+    headers: {
+      'Access-Control-Allow-Origin': '*'
+    },
     body: {
       commitHash: commitHash,
       users: rooms.connectionsCount(),
