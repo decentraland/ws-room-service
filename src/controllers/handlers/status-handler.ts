@@ -1,12 +1,15 @@
 import { HandlerContextWithPath } from '../../types'
 
-export async function statusHandler(
-  context: Pick<HandlerContextWithPath<'metrics' | 'config', '/status'>, 'url' | 'components'>
-) {
-  const config = context.components.config
+export async function statusHandler({
+  components: { config, rooms }
+}: Pick<HandlerContextWithPath<'config' | 'rooms', '/status'>, 'url' | 'components'>) {
+  const commitHash = (await config.getString('COMMIT_HASH')) || 'unknown'
+
   return {
     body: {
-      commitHash: await config.getString('COMMIT_HASH')
+      commitHash: commitHash,
+      users: rooms.connectionsCount(),
+      rooms: rooms.roomCount()
     }
   }
 }

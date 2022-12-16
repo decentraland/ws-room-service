@@ -5,6 +5,7 @@ import { WsPacket } from '../proto/ws_comms.gen'
 
 export type RoomComponent = {
   connectionsCount(): number
+  roomCount(): number
   addSocketToRoom(ws: InternalWebSocket): void
   removeFromRoom(ws: InternalWebSocket): void
   isAddressConnected(address: string): boolean
@@ -216,12 +217,17 @@ export function createRoomsComponent(
     return addressToSocket.size
   }
 
+  function roomCount(): number {
+    return rooms.size
+  }
+
   function getRoomSize(room: string): number {
     return rooms.get(room)?.size || 0
   }
 
   return {
     connectionsCount,
+    roomCount,
     getRoom,
     addSocketToRoom,
     isAddressConnected,

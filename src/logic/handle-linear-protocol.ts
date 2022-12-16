@@ -37,7 +37,7 @@ export async function handleSocketLinearProtocol(
 
     // Check that the max number of users in a room has not been reached
     if (rooms.getRoomSize(socket.roomId) >= maxUsers) {
-      logger.error('Closing connection: kicking user as the room is already at max capacity')
+      logger.warn('Closing connection: kicking user as the room is already at max capacity')
       const kickMessage = craftMessage({
         message: {
           $case: 'peerKicked',
@@ -92,7 +92,7 @@ export async function handleSocketLinearProtocol(
       socket.address = normalizeAddress(address)
       logger.debug(`Authentication successful`, { address: address })
     } else {
-      logger.error(`Authentication failed`, { message: result.message } as any)
+      logger.warn(`Authentication failed`, { message: result.message } as any)
       throw new Error('Authentication failed')
     }
   } finally {
