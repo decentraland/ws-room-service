@@ -7,10 +7,12 @@ export async function createStatusHandler({
   const commitHash = (await config.getString('COMMIT_HASH')) || 'unknown'
 
   return async (res): Promise<void> => {
+    res.writeHeader('Access-Control-Allow-Origin', '*')
     res.end(
       JSON.stringify({
         commitHash,
-        users: rooms.connectionsCount()
+        users: rooms.connectionsCount(),
+        rooms: rooms.roomCount()
       })
     )
   }
