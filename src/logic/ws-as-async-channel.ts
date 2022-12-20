@@ -1,21 +1,23 @@
 import { AsyncQueue } from '@well-known-components/pushable-channel'
-import { WebSocketReader } from '../types'
 import { WsPacket } from '../proto/ws_comms.gen'
+import { InternalWebSocket } from '../types'
 
-export function wsAsAsyncChannel(socket: WebSocketReader) {
+export function wsAsAsyncChannel(socket: Pick<InternalWebSocket, 'on' | 'emit' | 'off' | 'end'>) {
   // Wire the socket to a pushable channel
   const channel = new AsyncQueue<WsPacket>((queue, action) => {
     if (action === 'close') {
-      socket.off('message', processMessage)
+      socket.off('message')
       socket.off('close', closeChannel)
     }
   })
-  function processMessage(data: Buffer) {
+  function processMessage(data: ArrayBuffer) {
     try {
-      channel.enqueue(WsPacket.decode(data))
-    } catch (error) {
+      channel.enqueue(WsPacket.decode(new Uint8Array(data)))
+    } catch (error: any) {
       socket.emit('error', error)
-      socket.end()
+      try {
+        socket.end()
+      } catch {}
     }
   }
   function closeChannel() {

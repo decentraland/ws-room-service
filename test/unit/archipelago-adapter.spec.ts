@@ -55,7 +55,9 @@ describe('archipelago-adapter', () => {
     }
 
     const metrics = createTestMetricsComponent(metricDeclarations)
-    const rooms = createRoomsComponent({ logs, metrics })
+    const rooms = createRoomsComponent({ logs, metrics }, () => {
+      /* broadcast */
+    })
     await createArchipelagoAdapter({ logs, config, wsConnector, rooms })
 
     expect((await init).type).toBe(TransportType.TT_WS)

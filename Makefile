@@ -1,3 +1,5 @@
+TESTARGS ?= test/
+
 src/proto/ws_comms.gen.ts: node_modules/@dcl/protocol/proto/decentraland/kernel/comms/rfc5/ws_comms.proto
 	mkdir -p src/proto
 	node_modules/.bin/protoc \
@@ -44,6 +46,6 @@ start: build
 	npm run start
 
 test:
-	npm run test
+	@node_modules/.bin/jest --forceExit --detectOpenHandles --coverage --verbose $(TESTARGS)
 
 .PHONY: build lint lint-fix install start test
