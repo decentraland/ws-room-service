@@ -17,7 +17,7 @@
     "@types/ws": "^8.5.3",
     "@well-known-components/test-helpers": "^1.4.0",
     "fp-future": "^1.0.1",
-    "jest": "^29.1.2",
+    "jest": "^29.4.1",
     "ts-jest": "^29.0.3",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
