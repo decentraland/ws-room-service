@@ -80,7 +80,10 @@ export function createRoomsComponent(
       addressToSocket.delete(socket.address)
     }
     if (roomInstance.size === 0) {
-      logger.debug('Destroying room', { room: socket.roomId, count: rooms.size })
+      logger.debug('Destroying room', {
+        room: socket.roomId,
+        count: rooms.size
+      })
       rooms.delete(socket.roomId)
       observeRoomCount()
     }
@@ -91,7 +94,12 @@ export function createRoomsComponent(
     // inform the room about the peer that left it
     broadcast(
       socket.roomId,
-      craftMessage({ message: { $case: 'peerLeaveMessage', peerLeaveMessage: { alias: socket.alias } } })
+      craftMessage({
+        message: {
+          $case: 'peerLeaveMessage',
+          peerLeaveMessage: { alias: socket.alias }
+        }
+      })
     )
   }
 
@@ -103,7 +111,11 @@ export function createRoomsComponent(
 
     const address = ws.address
 
-    logger.debug('Connecting user', { room: ws.roomId, address, alias: ws.alias })
+    logger.debug('Connecting user', {
+      room: ws.roomId,
+      address,
+      alias: ws.alias
+    })
 
     const roomInstance = getRoom(ws.roomId)
 
@@ -111,11 +123,27 @@ export function createRoomsComponent(
     const kicked = getSocket(address)
 
     if (kicked) {
-      logger.info('Kicking user', { room: ws.roomId, address, alias: kicked.alias })
-      kicked.send(craftMessage({ message: { $case: 'peerKicked', peerKicked: { reason: 'Already connected' } } }), true)
+      logger.info('Kicking user', {
+        room: ws.roomId,
+        address,
+        alias: kicked.alias
+      })
+      kicked.send(
+        craftMessage({
+          message: {
+            $case: 'peerKicked',
+            peerKicked: { reason: 'Already connected' }
+          }
+        }),
+        true
+      )
       kicked.close()
       removeFromRoom(kicked)
-      logger.info('Kicked user', { room: ws.roomId, address, alias: kicked.alias })
+      logger.info('Kicked user', {
+        room: ws.roomId,
+        address,
+        alias: kicked.alias
+      })
       components.metrics.increment('dcl_ws_rooms_kicks_total')
     }
 

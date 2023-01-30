@@ -16,7 +16,9 @@ const DEFAULT_ETH_NETWORK = 'goerli'
 
 // Initialize all the components of the app
 export async function initComponents(): Promise<AppComponents> {
-  const config = await createDotEnvConfigComponent({ path: ['.env.default', '.env'] })
+  const config = await createDotEnvConfigComponent({
+    path: ['.env.default', '.env']
+  })
 
   const ethNetwork = (await config.getString('ETH_NETWORK')) ?? DEFAULT_ETH_NETWORK
 
