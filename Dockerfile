@@ -15,15 +15,16 @@ RUN chmod +x /tini
 
 # install dependencies
 COPY package.json /app/package.json
-COPY package-lock.json /app/package-lock.json
-RUN npm ci
+COPY yarn.lock /app/yarn.lock
+RUN yarn install --frozen-lockfile
 
 # build the app
 COPY . /app
-RUN make build
+RUN yarn test
+RUN yarn build
 
 # remove devDependencies, keep only used dependencies
-RUN npm ci --only=production
+RUN yarn install --prod --frozen-lockfile
 
 ARG COMMIT_HASH
 RUN echo "COMMIT_HASH=$COMMIT_HASH" >> .env

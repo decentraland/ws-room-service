@@ -14,12 +14,12 @@ jobs:
           node-version: 16.x
           cache: npm
       - name: install
-        run: npm ci
+        run: yarn install --frozen-lockfile
       - name: check code lint
-        run:  npm run lint:check
+        run:  yarn lint:check
       - name: build
-        run: make build
+        run: yarn build
       - name: create .env
         run: echo "" >> .env
       - name: test
-        run: npm run test:coverage
+        run: yarn test:coverage

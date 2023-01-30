@@ -1,7 +1,7 @@
 import { AppComponents, InternalWebSocket } from '../types'
 import { validateMetricsDeclaration } from '@well-known-components/metrics'
 import { craftMessage } from '../logic/craft-message'
-import { WsPacket } from '../proto/ws_comms.gen'
+import { WsPacket } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
 
 export type RoomComponent = {
   connectionsCount(): number

@@ -1,5 +1,6 @@
 import { AsyncQueue } from '@well-known-components/pushable-channel'
-import { WsPacket } from '../proto/ws_comms.gen'
+import { WsPacket } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
+
 import { InternalWebSocket } from '../types'
 
 export function wsAsAsyncChannel(socket: Pick<InternalWebSocket, 'on' | 'emit' | 'off' | 'end'>) {

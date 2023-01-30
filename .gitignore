@@ -2,8 +2,4 @@ dist/
 node_modules/
 **/.DS_Store
 coverage
-
-protoc3
 .env
-
-src/proto
