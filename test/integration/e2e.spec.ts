@@ -8,7 +8,7 @@ import { WebSocket } from 'ws'
 import {
   WsChallengeRequired,
   WsPacket,
-  WsWelcome,
+  WsWelcome
 } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
 import { URL } from 'url'
 import mitt from 'mitt'
@@ -44,13 +44,13 @@ test('end to end test', ({ components }) => {
     sock.addEventListener('message', (evt) => {
       events.emit('message', evt.data as ArrayBuffer)
     })
-    sock.addEventListener('close', (evt) => {
+    sock.addEventListener('close', (_) => {
       events.emit('close')
     })
-    sock.addEventListener('error', (evt) => {
+    sock.addEventListener('error', (_) => {
       events.emit('error')
     })
-    sock.addEventListener('open', (evt) => {
+    sock.addEventListener('open', (_) => {
       events.emit('open')
     })
 
@@ -58,7 +58,7 @@ test('end to end test', ({ components }) => {
       ...events,
       end() {
         sock.close()
-      },
+      }
     }
   }
 
@@ -72,8 +72,8 @@ test('end to end test', ({ components }) => {
       craftMessage({
         message: {
           $case: 'peerIdentification',
-          peerIdentification: { address: identity.address },
-        },
+          peerIdentification: { address: identity.address }
+        }
       })
     )
 
@@ -88,8 +88,8 @@ test('end to end test', ({ components }) => {
       craftMessage({
         message: {
           $case: 'signedChallengeForServer',
-          signedChallengeForServer: { authChainJson },
-        },
+          signedChallengeForServer: { authChainJson }
+        }
       })
     )
 
@@ -152,7 +152,7 @@ test('end to end test', ({ components }) => {
 
     // when bob joins the room, the welcome message contains alice's information
     expect(bob.welcomeMessage.peerIdentities).toMatchObject({
-      [alice.welcomeMessage.alias]: normalizeAddress(alice.identity.address),
+      [alice.welcomeMessage.alias]: normalizeAddress(alice.identity.address)
     })
 
     // when bob connects alice receives peerJoinMessage
@@ -161,8 +161,8 @@ test('end to end test', ({ components }) => {
       $case: 'peerJoinMessage',
       peerJoinMessage: {
         address: normalizeAddress(bob.identity.address),
-        alias: bob.welcomeMessage.alias,
-      },
+        alias: bob.welcomeMessage.alias
+      }
     })
 
     {
@@ -172,8 +172,8 @@ test('end to end test', ({ components }) => {
         craftMessage({
           message: {
             $case: 'peerUpdateMessage',
-            peerUpdateMessage: { fromAlias: 0, body: Uint8Array.from([1, 2, 3]), unreliable: false },
-          },
+            peerUpdateMessage: { fromAlias: 0, body: Uint8Array.from([1, 2, 3]), unreliable: false }
+          }
         })
       )
       packet = await bob.channel.yield(1000, 'alice awaits message from bob')
@@ -182,8 +182,8 @@ test('end to end test', ({ components }) => {
         peerUpdateMessage: {
           fromAlias: alice.welcomeMessage.alias,
           body: Uint8Array.from([1, 2, 3]),
-          unreliable: false,
-        },
+          unreliable: false
+        }
       })
     }
 
@@ -203,9 +203,9 @@ test('end to end test', ({ components }) => {
             peerUpdateMessage: {
               fromAlias: 0,
               body: Uint8Array.from([3, 2, 3]),
-              unreliable: false,
-            },
-          },
+              unreliable: false
+            }
+          }
         })
       )
       packet = await alice.channel.yield(1000, 'alice awaits message from bob')
@@ -214,8 +214,8 @@ test('end to end test', ({ components }) => {
         peerUpdateMessage: {
           fromAlias: bob.welcomeMessage.alias,
           body: Uint8Array.from([3, 2, 3]),
-          unreliable: false,
-        },
+          unreliable: false
+        }
       })
     }
 
@@ -227,7 +227,7 @@ test('end to end test', ({ components }) => {
         // clohe receives welcome with bob and alice
         expect(clohe.welcomeMessage.peerIdentities).toMatchObject({
           [alice.welcomeMessage.alias]: normalizeAddress(alice.identity.address),
-          [bob.welcomeMessage.alias]: normalizeAddress(bob.identity.address),
+          [bob.welcomeMessage.alias]: normalizeAddress(bob.identity.address)
         })
       }
 
@@ -238,8 +238,8 @@ test('end to end test', ({ components }) => {
           $case: 'peerJoinMessage',
           peerJoinMessage: {
             address: normalizeAddress(clohe.identity.address),
-            alias: clohe.welcomeMessage.alias,
-          },
+            alias: clohe.welcomeMessage.alias
+          }
         })
       }
 
@@ -250,8 +250,8 @@ test('end to end test', ({ components }) => {
           $case: 'peerJoinMessage',
           peerJoinMessage: {
             address: normalizeAddress(clohe.identity.address),
-            alias: clohe.welcomeMessage.alias,
-          },
+            alias: clohe.welcomeMessage.alias
+          }
         })
       }
       {
@@ -264,9 +264,9 @@ test('end to end test', ({ components }) => {
               peerUpdateMessage: {
                 fromAlias: 0,
                 body: Uint8Array.from([6]),
-                unreliable: false,
-              },
-            },
+                unreliable: false
+              }
+            }
           })
         )
 
@@ -278,8 +278,8 @@ test('end to end test', ({ components }) => {
             peerUpdateMessage: {
               fromAlias: clohe.welcomeMessage.alias,
               body: Uint8Array.from([6]),
-              unreliable: false,
-            },
+              unreliable: false
+            }
           })
         }
 
@@ -291,8 +291,8 @@ test('end to end test', ({ components }) => {
             peerUpdateMessage: {
               fromAlias: clohe.welcomeMessage.alias,
               body: Uint8Array.from([6]),
-              unreliable: false,
-            },
+              unreliable: false
+            }
           })
         }
       }
@@ -306,8 +306,8 @@ test('end to end test', ({ components }) => {
           expect(packet.message).toMatchObject({
             $case: 'peerLeaveMessage',
             peerLeaveMessage: {
-              alias: clohe.welcomeMessage.alias,
-            },
+              alias: clohe.welcomeMessage.alias
+            }
           })
         }
 
@@ -317,8 +317,8 @@ test('end to end test', ({ components }) => {
           expect(packet.message).toMatchObject({
             $case: 'peerLeaveMessage',
             peerLeaveMessage: {
-              alias: clohe.welcomeMessage.alias,
-            },
+              alias: clohe.welcomeMessage.alias
+            }
           })
         }
       }
@@ -333,8 +333,8 @@ test('end to end test', ({ components }) => {
       expect(packet.message).toMatchObject({
         $case: 'peerLeaveMessage',
         peerLeaveMessage: {
-          alias: alice.welcomeMessage.alias,
-        },
+          alias: alice.welcomeMessage.alias
+        }
       })
     }
 

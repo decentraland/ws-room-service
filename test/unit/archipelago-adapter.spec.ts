@@ -7,7 +7,7 @@ import {
   TransportHeartbeat,
   TransportInit,
   TransportMessage,
-  TransportType,
+  TransportType
 } from '@dcl/protocol/out-js/decentraland/kernel/comms/v3/archipelago.gen'
 import { future } from 'fp-future'
 import { createRoomsComponent } from '../../src/adapters/rooms'
@@ -21,7 +21,7 @@ describe('archipelago-adapter', () => {
       ARCHIPELAGO_TRANSPORT_REGISTRATION_URL: 'ws://archipelago',
       ARCHIPELAGO_TRANSPORT_REGISTRATION_SECRET: '123456',
       WS_ROOM_SERVICE_URL: 'ws://ws-room-service',
-      WS_ROOM_SERVICE_SECRET: '123456',
+      WS_ROOM_SERVICE_SECRET: '123456'
     })
 
     let onMessageListener: MessageHandler
@@ -49,9 +49,9 @@ describe('archipelago-adapter', () => {
                 authResponse.resolve(message.authResponse)
                 break
             }
-          },
+          }
         }
-      },
+      }
     }
 
     const metrics = createTestMetricsComponent(metricDeclarations)
@@ -70,9 +70,9 @@ describe('archipelago-adapter', () => {
           authRequest: {
             requestId: 'request1',
             userIds: ['user1', 'user2'],
-            roomId: 'I1',
-          },
-        },
+            roomId: 'I1'
+          }
+        }
       }).finish()
     )
 
