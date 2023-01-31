@@ -8,7 +8,7 @@ import {
   TransportInit,
   TransportMessage,
   TransportType
-} from '../../src/proto/archipelago.gen'
+} from '@dcl/protocol/out-js/decentraland/kernel/comms/v3/archipelago.gen'
 import { future } from 'fp-future'
 import { createRoomsComponent } from '../../src/adapters/rooms'
 import { createTestMetricsComponent } from '@well-known-components/metrics'

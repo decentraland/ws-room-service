@@ -1,17 +1,16 @@
-name: CI/CD on main branch
+name: Publish 'latest' image
 
 on:
-  push:
-    branches:
-      - "main"
+  release:
+    types:
+      - "created"
 
 jobs:
-  cd-dev:
+  cd:
     uses: decentraland/actions/.github/workflows/build-quay-main.yml@main
     with:
-      service-name: ws-room-service
-      deployment-environment: dev
-      docker-tag: next
+      service-name: explorer-bff
+      docker-tag: latest ${{ github.event.release.tag_name }}
     secrets:
       QUAY_USERNAME: ${{ secrets.QUAY_USERNAME }}
       QUAY_TOKEN: ${{ secrets.QUAY_TOKEN }}

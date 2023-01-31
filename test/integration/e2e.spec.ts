@@ -4,8 +4,12 @@ import { createEphemeralIdentity } from '../helpers/identity'
 import { future } from 'fp-future'
 import { craftMessage } from '../../src/logic/craft-message'
 import { normalizeAddress } from '../../src/logic/address'
-import { WsChallengeRequired, WsPacket, WsWelcome } from '../../src/proto/ws_comms.gen'
 import { WebSocket } from 'ws'
+import {
+  WsChallengeRequired,
+  WsPacket,
+  WsWelcome
+} from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
 import { URL } from 'url'
 import mitt from 'mitt'
 import { InternalWebSocket } from '../../src/types'
@@ -37,21 +41,22 @@ test('end to end test', ({ components }) => {
   function adaptSocket(sock: WebSocket): Pick<InternalWebSocket, 'on' | 'off' | 'emit' | 'end'> {
     const events = mitt<WsEvents>()
 
-    sock.addEventListener('message', evt => {
+    sock.addEventListener('message', (evt) => {
       events.emit('message', evt.data as ArrayBuffer)
     })
-    sock.addEventListener('close', evt => {
+    sock.addEventListener('close', (_) => {
       events.emit('close')
     })
-    sock.addEventListener('error', evt => {
+    sock.addEventListener('error', (_) => {
       events.emit('error')
     })
-    sock.addEventListener('open', evt => {
+    sock.addEventListener('open', (_) => {
       events.emit('open')
     })
 
     return {
-      ...events, end() {
+      ...events,
+      end() {
         sock.close()
       }
     }
@@ -173,13 +178,13 @@ test('end to end test', ({ components }) => {
       )
       packet = await bob.channel.yield(1000, 'alice awaits message from bob')
       expect(packet.message).toMatchObject({
-          $case: 'peerUpdateMessage',
-          peerUpdateMessage: {
-            fromAlias: alice.welcomeMessage.alias,
-            body: Uint8Array.from([1, 2, 3]),
-            unreliable: false
-          }
-        })
+        $case: 'peerUpdateMessage',
+        peerUpdateMessage: {
+          fromAlias: alice.welcomeMessage.alias,
+          body: Uint8Array.from([1, 2, 3]),
+          unreliable: false
+        }
+      })
     }
 
     {
@@ -241,15 +246,13 @@ test('end to end test', ({ components }) => {
       {
         // bob receives peerJoinMessage
         packet = await bob.channel.yield(1000, 'bob receives peerJoinMessage')
-        expect(packet.message).toMatchObject(
-          {
-            $case: 'peerJoinMessage',
-            peerJoinMessage: {
-              address: normalizeAddress(clohe.identity.address),
-              alias: clohe.welcomeMessage.alias
-            }
+        expect(packet.message).toMatchObject({
+          $case: 'peerJoinMessage',
+          peerJoinMessage: {
+            address: normalizeAddress(clohe.identity.address),
+            alias: clohe.welcomeMessage.alias
           }
-        )
+        })
       }
       {
         // then send a message
@@ -270,31 +273,27 @@ test('end to end test', ({ components }) => {
         {
           // alice receives update
           packet = await alice.channel.yield(1000, 'alice receives update')
-          expect(packet.message).toMatchObject(
-            {
-              $case: 'peerUpdateMessage',
-              peerUpdateMessage: {
-                fromAlias: clohe.welcomeMessage.alias,
-                body: Uint8Array.from([6]),
-                unreliable: false
-              }
+          expect(packet.message).toMatchObject({
+            $case: 'peerUpdateMessage',
+            peerUpdateMessage: {
+              fromAlias: clohe.welcomeMessage.alias,
+              body: Uint8Array.from([6]),
+              unreliable: false
             }
-          )
+          })
         }
 
         {
           // bob receives update
           packet = await bob.channel.yield(1000, 'bob receives update')
-          expect(packet.message).toMatchObject(
-            {
-              $case: 'peerUpdateMessage',
-              peerUpdateMessage: {
-                fromAlias: clohe.welcomeMessage.alias,
-                body: Uint8Array.from([6]),
-                unreliable: false
-              }
+          expect(packet.message).toMatchObject({
+            $case: 'peerUpdateMessage',
+            peerUpdateMessage: {
+              fromAlias: clohe.welcomeMessage.alias,
+              body: Uint8Array.from([6]),
+              unreliable: false
             }
-          )
+          })
         }
       }
       {
@@ -304,27 +303,23 @@ test('end to end test', ({ components }) => {
         {
           // alice receives leave
           packet = await alice.channel.yield(1000, 'alice receives leave')
-          expect(packet.message).toMatchObject(
-            {
-              $case: 'peerLeaveMessage',
-              peerLeaveMessage: {
-                alias: clohe.welcomeMessage.alias
-              }
+          expect(packet.message).toMatchObject({
+            $case: 'peerLeaveMessage',
+            peerLeaveMessage: {
+              alias: clohe.welcomeMessage.alias
             }
-          )
+          })
         }
 
         {
           // bob receives leave
           packet = await bob.channel.yield(1000, 'bob receives leave')
-          expect(packet.message).toMatchObject(
-            {
-              $case: 'peerLeaveMessage',
-              peerLeaveMessage: {
-                alias: clohe.welcomeMessage.alias
-              }
+          expect(packet.message).toMatchObject({
+            $case: 'peerLeaveMessage',
+            peerLeaveMessage: {
+              alias: clohe.welcomeMessage.alias
             }
-          )
+          })
         }
       }
     }
@@ -335,14 +330,12 @@ test('end to end test', ({ components }) => {
     {
       // bob receives leave
       packet = await bob.channel.yield(1000, 'bob receives leave 2')
-      expect(packet.message).toMatchObject(
-        {
-          $case: 'peerLeaveMessage',
-          peerLeaveMessage: {
-            alias: alice.welcomeMessage.alias
-          }
+      expect(packet.message).toMatchObject({
+        $case: 'peerLeaveMessage',
+        peerLeaveMessage: {
+          alias: alice.welcomeMessage.alias
         }
-      )
+      })
     }
 
     bob.close()

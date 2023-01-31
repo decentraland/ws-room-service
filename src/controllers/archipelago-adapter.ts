@@ -1,4 +1,4 @@
-import { TransportMessage, TransportType } from '../proto/archipelago.gen'
+import { TransportMessage, TransportType } from '@dcl/protocol/out-js/decentraland/kernel/comms/v3/archipelago.gen'
 import { sign } from 'jsonwebtoken'
 
 import { BaseComponents } from '../types'
