@@ -6,6 +6,7 @@ import { WsPacket } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws
 export type RoomComponent = {
   connectionsCount(): number
   roomCount(): number
+  roomsWithCounts(): { roomName: string; count: number }[]
   addSocketToRoom(ws: InternalWebSocket): void
   removeFromRoom(ws: InternalWebSocket): void
   isAddressConnected(address: string): boolean
@@ -249,6 +250,13 @@ export function createRoomsComponent(
     return rooms.size
   }
 
+  function roomsWithCounts(): { roomName: string; count: number }[] {
+    return [...rooms.keys()].map((value) => ({
+      roomName: value,
+      count: rooms.get(value)!.size
+    }))
+  }
+
   function getRoomSize(room: string): number {
     return rooms.get(room)?.size || 0
   }
@@ -256,6 +264,7 @@ export function createRoomsComponent(
   return {
     connectionsCount,
     roomCount,
+    roomsWithCounts,
     getRoom,
     addSocketToRoom,
     isAddressConnected,

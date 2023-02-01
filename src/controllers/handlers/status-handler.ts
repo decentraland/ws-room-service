@@ -12,7 +12,8 @@ export async function statusHandler({
     body: {
       commitHash: commitHash,
       users: rooms.connectionsCount(),
-      rooms: rooms.roomCount()
+      rooms: rooms.roomCount(),
+      details: rooms.roomsWithCounts()
     }
   }
 }
