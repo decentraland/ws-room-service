@@ -339,10 +339,19 @@
   dependencies:
     ts-proto "^1.146.0"
 
-"@dcl/schemas@^7.3.4", "@dcl/schemas@^7.4.1":
+"@dcl/schemas@^7.3.4":
   version "7.4.1"
   resolved "https://registry.yarnpkg.com/@dcl/schemas/-/schemas-7.4.1.tgz#f2209e7be165ec445bc428bfe35f7a236f5429ae"
   integrity sha512-gYqhzU1q7+XpME+oF1HrzuVxM6fw+EvAN8M5HVwppyHOthy6ortNMOmMhspIQ8eXNAwGmwxKlBjUM2jh0qNy5Q==
+  dependencies:
+    ajv "^8.11.0"
+    ajv-errors "^3.0.0"
+    ajv-keywords "^5.1.0"
+
+"@dcl/schemas@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@dcl/schemas/-/schemas-8.1.0.tgz#4824a919db1ec194fceb1996f64f1f4cb260c895"
+  integrity sha512-1A7st/fESASmss+T1Vxc9lo3LHqSvgfDTLtLD2uhdgtOS0RombNES3KG/2zDfBpg9v3DCEchN6i7mWiCEw7/6g==
   dependencies:
     ajv "^8.11.0"
     ajv-errors "^3.0.0"
