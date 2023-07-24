@@ -332,12 +332,12 @@
     eslint-plugin-prettier "^4.2.1"
     prettier "^2.8.8"
 
-"@dcl/protocol@^1.0.0-4659981125.commit-93719f9":
-  version "1.0.0-4659981125.commit-93719f9"
-  resolved "https://registry.yarnpkg.com/@dcl/protocol/-/protocol-1.0.0-4659981125.commit-93719f9.tgz#b5004c1319d7d91dcfa400cb10bb77405aa60ce4"
-  integrity sha512-JsfVj9AHXmrv5qtmqFhbZnz9dHuu/ZcYQ96JWAUEOkxwTfQbzrj3NThJieH7wcbB/qnsDsTD/9+DKI9G6Cs15Q==
+"@dcl/protocol@^1.0.0-5623934099.commit-07e0626":
+  version "1.0.0-5623934099.commit-07e0626"
+  resolved "https://registry.yarnpkg.com/@dcl/protocol/-/protocol-1.0.0-5623934099.commit-07e0626.tgz#f25212543f1d03a9a310d81de9f78a1e561b75d7"
+  integrity sha512-OTa7l4HwHIaj/GgMwvy2+u3fHhyq5EvyO8XRXBbaWOdQTTxa8QdNCINzoT4W36kWwZ3nidoyj0vODR/EyEu+RA==
   dependencies:
-    ts-proto "^1.146.0"
+    "@dcl/ts-proto" "1.153.0"
 
 "@dcl/schemas@^7.3.4", "@dcl/schemas@^7.4.1":
   version "7.4.1"
@@ -347,6 +347,19 @@
     ajv "^8.11.0"
     ajv-errors "^3.0.0"
     ajv-keywords "^5.1.0"
+
+"@dcl/ts-proto@1.153.0":
+  version "1.153.0"
+  resolved "https://registry.yarnpkg.com/@dcl/ts-proto/-/ts-proto-1.153.0.tgz#3104f0c23f69fd4fb04759d147970853f7df52dd"
+  integrity sha512-jmoK+/mxSyhxIswar1SRPcEp/N1/QYShbuAHc4FEPls843m0kbPUUKJYCwtFCd+Fwu3pT8j8O30cq9iJ80gaZQ==
+  dependencies:
+    "@types/object-hash" "^3.0.2"
+    case-anything "^2.1.10"
+    dataloader "^1.4.0"
+    object-hash "^3.0.0"
+    protobufjs "^7.2.4"
+    ts-poet "^6.4.1"
+    ts-proto-descriptors "1.9.0"
 
 "@eslint-community/eslint-utils@^4.2.0":
   version "4.4.0"
@@ -1539,6 +1552,11 @@
   version "1.3.4"
   resolved "https://registry.yarnpkg.com/@types/object-hash/-/object-hash-1.3.4.tgz#079ba142be65833293673254831b5e3e847fe58b"
   integrity sha512-xFdpkAkikBgqBdG9vIlsqffDV8GpvnPEzs0IUtr1v3BEB97ijsFQ4RXVbUZwjFThhB4MDSTUfvmxUD5PGx0wXA==
+
+"@types/object-hash@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@types/object-hash/-/object-hash-3.0.2.tgz#f3656433e6c6049571fc3fb3fb42f389af96c0eb"
+  integrity sha512-tfyXl1JPCf2hzIDK29gO7qGqJjThKBzg/Cn3bA68R9NmWdOx+f7k5mm4to/n43BHspCwcoUC6FU4NpUoK/h9bQ==
 
 "@types/pbkdf2@^3.0.0":
   version "3.1.0"
@@ -4942,6 +4960,11 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+long@^5.0.0:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.2.3.tgz#a3ba97f3877cf1d778eccbcb048525ebb77499e1"
+  integrity sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==
+
 lru-cache@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
@@ -5170,6 +5193,11 @@ object-hash@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-1.3.1.tgz#fde452098a951cb145f039bb7d455449ddc126df"
   integrity sha512-OSuu/pU4ENM9kmREg0BdNrUDIl1heYa4mBZacJc+vVWz4GtAwu7jO8s4AIt2aGRUTqxykpWzI3Oqnsm13tTMDA==
+
+object-hash@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-3.0.0.tgz#73f97f753e7baffc0e2cc9d6e079079744ac82e9"
+  integrity sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==
 
 object-inspect@^1.12.2, object-inspect@^1.9.0:
   version "1.12.3"
@@ -5486,6 +5514,24 @@ protobufjs@^6.11.3, protobufjs@^6.8.8:
     "@types/long" "^4.0.1"
     "@types/node" ">=13.7.0"
     long "^4.0.0"
+
+protobufjs@^7.2.4:
+  version "7.2.4"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-7.2.4.tgz#3fc1ec0cdc89dd91aef9ba6037ba07408485c3ae"
+  integrity sha512-AT+RJgD2sH8phPmCf7OUZR8xGdcJRga4+1cOaXJ64hvcSkVhNcRHOwIxUatPH15+nj59WAGTDv3LSGZPEQbJaQ==
+  dependencies:
+    "@protobufjs/aspromise" "^1.1.2"
+    "@protobufjs/base64" "^1.1.2"
+    "@protobufjs/codegen" "^2.0.4"
+    "@protobufjs/eventemitter" "^1.1.0"
+    "@protobufjs/fetch" "^1.1.0"
+    "@protobufjs/float" "^1.0.2"
+    "@protobufjs/inquire" "^1.1.0"
+    "@protobufjs/path" "^1.1.2"
+    "@protobufjs/pool" "^1.1.0"
+    "@protobufjs/utf8" "^1.1.0"
+    "@types/node" ">=13.7.0"
+    long "^5.0.0"
 
 proxy-addr@~2.0.7:
   version "2.0.7"
@@ -6141,7 +6187,15 @@ ts-proto-descriptors@1.8.0:
     long "^4.0.0"
     protobufjs "^6.8.8"
 
-ts-proto@^1.126.1, ts-proto@^1.146.0:
+ts-proto-descriptors@1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/ts-proto-descriptors/-/ts-proto-descriptors-1.9.0.tgz#0ed5631f11851846c8de21be2bff346719edce71"
+  integrity sha512-Ui8zA5Q4Jnq6JIGRraUWvECrqixxtwwin8GkhIkvwCpR+JcSPsxWe8HfTj5eHfyruGYI6Zjf96XlC87hTakHfQ==
+  dependencies:
+    long "^4.0.0"
+    protobufjs "^6.8.8"
+
+ts-proto@^1.126.1:
   version "1.146.0"
   resolved "https://registry.yarnpkg.com/ts-proto/-/ts-proto-1.146.0.tgz#4017c700976d3657009c4e7e741377a4272ffc27"
   integrity sha512-OyBZRjmqqw+aatLEUbRooWO6VKTtOLJQyaQFMciigEZPNgTsWtApqHpQDtqDMQFWEXhIARqEV+B7ZJx8cljhZA==
