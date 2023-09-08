@@ -5,7 +5,7 @@ import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
 import { craftMessage } from './craft-message'
 
-const DEFAULT_MAX_USERS = 100
+const DEFAULT_MAX_USERS = 150
 
 export async function handleSocketLinearProtocol(
   {
