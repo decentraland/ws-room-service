@@ -12,6 +12,7 @@ updates:
     - dependency-name: "@catalyst/*"
     - dependency-name: "@well-known-components/*"
     - dependency-name: "dcl-*"
+    - dependency-name: "jsonwebtoken"
   versioning-strategy: auto
   commit-message:
     prefix: "chore: "

@@ -4,7 +4,8 @@ import { Authenticator } from '@dcl/crypto'
 import { wsAsAsyncChannel } from './ws-as-async-channel'
 import { normalizeAddress } from './address'
 import { craftMessage } from './craft-message'
-import { DEFAULT_MAX_USERS } from '../controllers/archipelago-adapter'
+
+const DEFAULT_MAX_USERS = 150
 
 export async function handleSocketLinearProtocol(
   {
