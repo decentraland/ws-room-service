@@ -16,6 +16,8 @@
     "@types/node": "^18.8.0",
     "@types/ws": "^8.5.3",
     "@well-known-components/test-helpers": "^1.5.3",
+    "eth-crypto": "^2.6.0",
+    "ethereum-cryptography": "^2.1.2",
     "fp-future": "^1.0.1",
     "typescript": "^4.9.5",
     "ws": "^8.14.0"
@@ -37,8 +39,6 @@
     "@well-known-components/logger": "^3.1.2",
     "@well-known-components/metrics": "^2.0.1",
     "@well-known-components/pushable-channel": "^1.0.3",
-    "eth-crypto": "^2.5.0",
-    "ethereum-cryptography": "^1.1.2",
     "jsonwebtoken": "^9.0.0",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.20.0"
   }
