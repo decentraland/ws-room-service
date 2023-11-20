@@ -15,7 +15,7 @@
     "@types/jsonwebtoken": "^8.5.9",
     "@types/node": "^18.8.0",
     "@types/ws": "^8.5.3",
-    "@well-known-components/test-helpers": "^1.5.3",
+    "@well-known-components/test-helpers": "^1.5.4",
     "eth-crypto": "^2.6.0",
     "ethereum-cryptography": "^2.1.2",
     "fp-future": "^1.0.1",
