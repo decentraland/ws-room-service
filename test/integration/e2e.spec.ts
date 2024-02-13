@@ -1,4 +1,4 @@
-import { wsAsAsyncChannel } from '../../src/logic/ws-as-async-channel'
+import { wsAsAsyncChannel } from '../helpers/ws-as-async-channel'
 import { test } from '../components'
 import { createEphemeralIdentity } from '../helpers/identity'
 import { future } from 'fp-future'
@@ -11,9 +11,6 @@ import {
   WsWelcome
 } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
 import { URL } from 'url'
-import mitt from 'mitt'
-import { InternalWebSocket } from '../../src/types'
-import { WsEvents } from '@well-known-components/http-server/dist/uws'
 
 function expectPacket<T>(packet: WsPacket, packetType: string): T {
   if (!packet.message || packet.message.$case !== packetType) {
@@ -38,33 +35,9 @@ test('end to end test', ({ components }) => {
     return ws
   }
 
-  function adaptSocket(sock: WebSocket): Pick<InternalWebSocket, 'on' | 'off' | 'emit' | 'end'> {
-    const events = mitt<WsEvents>()
-
-    sock.addEventListener('message', (evt) => {
-      events.emit('message', evt.data as ArrayBuffer)
-    })
-    sock.addEventListener('close', (_) => {
-      events.emit('close')
-    })
-    sock.addEventListener('error', (_) => {
-      events.emit('error')
-    })
-    sock.addEventListener('open', (_) => {
-      events.emit('open')
-    })
-
-    return {
-      ...events,
-      end() {
-        sock.close()
-      }
-    }
-  }
-
   async function connectSocket(identity: ReturnType<typeof createEphemeralIdentity>, room: string) {
     const ws = await createWs('/rooms/' + room)
-    const channel = wsAsAsyncChannel(adaptSocket(ws))
+    const channel = wsAsAsyncChannel(ws)
 
     await socketConnected(ws)
     await socketSend(

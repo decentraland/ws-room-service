@@ -1,19 +1,25 @@
-import { HandlerContextWithPath } from '../../types'
+import { AppComponents } from '../../types'
 
-export async function statusHandler({
-  components: { config, rooms }
-}: Pick<HandlerContextWithPath<'config' | 'rooms', '/status'>, 'url' | 'components'>) {
-  const commitHash = (await config.getString('COMMIT_HASH')) || 'unknown'
+export async function createStatusHandler(components: Pick<AppComponents, 'config' | 'rooms'>) {
+  const { config, rooms } = components
+  const [commitHash, version] = await Promise.all([
+    config.getString('COMMIT_HASH'),
+    config.getString('CURRENT_VERSION')
+  ])
 
   return {
-    headers: {
-      'Access-Control-Allow-Origin': '*'
-    },
-    body: {
-      commitHash: commitHash,
-      users: rooms.connectionsCount(),
-      rooms: rooms.roomCount(),
-      details: rooms.roomsWithCounts()
+    path: '/status',
+    f: async () => {
+      return {
+        body: {
+          version: version ?? '',
+          currentTime: Date.now(),
+          commitHash: commitHash ?? 'unknown',
+          users: rooms.connectionsCount(),
+          rooms: rooms.roomCount(),
+          details: rooms.roomsWithCounts()
+        }
+      }
     }
   }
 }

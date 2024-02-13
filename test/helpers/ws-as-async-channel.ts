@@ -1,13 +1,12 @@
 import { AsyncQueue } from '@well-known-components/pushable-channel'
 import { WsPacket } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
+import WebSocket from 'ws'
 
-import { InternalWebSocket } from '../types'
-
-export function wsAsAsyncChannel(socket: Pick<InternalWebSocket, 'on' | 'emit' | 'off' | 'end'>) {
+export function wsAsAsyncChannel(socket: WebSocket) {
   // Wire the socket to a pushable channel
-  const channel = new AsyncQueue<WsPacket>((queue, action) => {
+  const channel = new AsyncQueue<WsPacket>((_queue, action) => {
     if (action === 'close') {
-      socket.off('message')
+      socket.off('message', processMessage)
       socket.off('close', closeChannel)
     }
   })
@@ -17,7 +16,7 @@ export function wsAsAsyncChannel(socket: Pick<InternalWebSocket, 'on' | 'emit' |
     } catch (error: any) {
       socket.emit('error', error)
       try {
-        socket.end()
+        socket.close()
       } catch {}
     }
   }
