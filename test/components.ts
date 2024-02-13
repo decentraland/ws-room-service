@@ -6,7 +6,6 @@ import { createRunner, createLocalFetchCompoment } from '@well-known-components/
 import { main } from '../src/service'
 import { TestComponents } from '../src/types'
 import { initComponents as originalInitComponents } from '../src/components'
-import { CloseHandler, MessageHandler } from '../src/adapters/ws-connector'
 
 /**
  * Behaves like Jest "describe" function, used to describe a test for a
@@ -25,16 +24,8 @@ async function initComponents(): Promise<TestComponents> {
 
   const { config } = components
 
-  const wsConnector = {
-    connect: async (_: string, __: MessageHandler, ___: CloseHandler) => {
-      return {
-        send(_: Uint8Array) {}
-      }
-    }
-  }
   return {
     ...components,
-    wsConnector,
     localFetch: await createLocalFetchCompoment(config)
   }
 }

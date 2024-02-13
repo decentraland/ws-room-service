@@ -3,7 +3,6 @@ import { createDotEnvConfigComponent } from '@well-known-components/env-config-p
 import { createLogComponent } from '@well-known-components/logger'
 import { AppComponents } from './types'
 import { metricDeclarations } from './metrics'
-import { createWsConnectorComponent } from './adapters/ws-connector'
 import { createRoomsComponent } from './adapters/rooms'
 import { observeBuildInfo } from './logic/build-info'
 import { createFetchComponent } from '@well-known-components/fetch-component'
@@ -22,7 +21,6 @@ export async function initComponents(): Promise<AppComponents> {
   const logs = await createLogComponent({})
   const fetch = createFetchComponent()
   const metrics = await createMetricsComponent(metricDeclarations, { config })
-  const wsConnector = createWsConnectorComponent({ logs })
   const server = await createUWsComponent({ config, logs })
 
   const rooms = createRoomsComponent({ logs, metrics, server })
@@ -40,7 +38,6 @@ export async function initComponents(): Promise<AppComponents> {
     logs,
     fetch,
     metrics,
-    wsConnector,
     rooms,
     ethereumProvider
   }

@@ -6,7 +6,6 @@ import type {
   IFetchComponent
 } from '@well-known-components/interfaces'
 import { metricDeclarations } from './metrics'
-import { IWebSocketConnectorComponent } from './adapters/ws-connector'
 import { RoomComponent } from './adapters/rooms'
 import {
   IUWsComponent,
@@ -20,7 +19,6 @@ export type BaseComponents = {
   config: IConfigComponent
   logs: ILoggerComponent
   metrics: IMetricsComponent<keyof typeof metricDeclarations>
-  wsConnector: IWebSocketConnectorComponent
   rooms: RoomComponent
   ethereumProvider: HTTPProvider
   server: IUWsComponent
