@@ -1,14 +1,27 @@
 import { IMetricsComponent } from '@well-known-components/interfaces'
-import { getDefaultHttpMetrics, validateMetricsDeclaration } from '@well-known-components/metrics'
-import { roomsMetrics } from './adapters/rooms'
+import { getDefaultHttpMetrics, validateMetricsDeclaration } from '@well-known-components/uws-http-server'
 
 export const metricDeclarations = {
   ...getDefaultHttpMetrics(),
-  ...roomsMetrics,
-  test_ping_counter: {
-    help: 'Count calls to ping',
-    type: IMetricsComponent.CounterType,
-    labelNames: ['pathname']
+  dcl_ws_rooms_count: {
+    help: 'Current amount of rooms',
+    type: IMetricsComponent.GaugeType
+  },
+  dcl_ws_rooms_connections: {
+    help: 'Current amount of connections',
+    type: IMetricsComponent.GaugeType
+  },
+  dcl_ws_rooms_connections_total: {
+    help: 'Total amount of connections',
+    type: IMetricsComponent.CounterType
+  },
+  dcl_ws_rooms_kicks_total: {
+    help: 'Total amount of kicked players',
+    type: IMetricsComponent.CounterType
+  },
+  dcl_ws_rooms_unknown_sent_messages_total: {
+    help: 'Total amount of unkown messages',
+    type: IMetricsComponent.CounterType
   },
   dcl_ws_rooms_in_messages: {
     help: 'Number of incoming messages',

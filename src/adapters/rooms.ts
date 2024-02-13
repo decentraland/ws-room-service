@@ -1,57 +1,30 @@
-import { AppComponents, InternalWebSocket } from '../types'
-import { validateMetricsDeclaration } from '@well-known-components/metrics'
+import { AppComponents, WebSocketHandshakeCompleted } from '../types'
 import { craftMessage } from '../logic/craft-message'
-import { WsPacket } from '@dcl/protocol/out-js/decentraland/kernel/comms/rfc5/ws_comms.gen'
 
 export type RoomComponent = {
   connectionsCount(): number
   roomCount(): number
   roomsWithCounts(): { roomName: string; count: number }[]
-  addSocketToRoom(ws: InternalWebSocket): void
-  removeFromRoom(ws: InternalWebSocket): void
+  addSocketToRoom(ws: WebSocketHandshakeCompleted): void
+  removeFromRoom(ws: WebSocketHandshakeCompleted): void
   isAddressConnected(address: string): boolean
-  getSocket(address: string): InternalWebSocket | undefined
-  getRoom(room: string): Set<InternalWebSocket>
+  getSocket(address: string): WebSocketHandshakeCompleted | undefined
+  getRoom(room: string): Set<WebSocketHandshakeCompleted>
   getRoomSize(room: string): number
 }
 
-export const roomsMetrics = validateMetricsDeclaration({
-  dcl_ws_rooms_count: {
-    help: 'Current amount of rooms',
-    type: 'gauge'
-  },
-  dcl_ws_rooms_connections: {
-    help: 'Current amount of connections',
-    type: 'gauge'
-  },
-  dcl_ws_rooms_connections_total: {
-    help: 'Total amount of connections',
-    type: 'counter'
-  },
-  dcl_ws_rooms_kicks_total: {
-    help: 'Total amount of kicked players',
-    type: 'counter'
-  },
-  dcl_ws_rooms_unknown_sent_messages_total: {
-    help: 'Total amount of unkown messages',
-    type: 'counter'
-  }
-})
-
-export function createRoomsComponent(
-  components: Pick<AppComponents, 'logs' | 'metrics'>,
-  broadcast: (roomId: string, message: Uint8Array) => void
-): RoomComponent {
-  const rooms = new Map<string, Set<InternalWebSocket>>()
-  const addressToSocket = new Map<string, InternalWebSocket>()
-  const logger = components.logs.getLogger('RoomsComponent')
+export function createRoomsComponent(components: Pick<AppComponents, 'logs' | 'metrics' | 'server'>): RoomComponent {
+  const { server, logs } = components
+  const rooms = new Map<string, Set<WebSocketHandshakeCompleted>>()
+  const addressToSocket = new Map<string, WebSocketHandshakeCompleted>()
+  const logger = logs.getLogger('RoomsComponent')
 
   // gets or creates a room
-  function getRoom(room: string): Set<InternalWebSocket> {
+  function getRoom(room: string): Set<WebSocketHandshakeCompleted> {
     let r = rooms.get(room)
     if (!r) {
       logger.debug('Creating room', { room })
-      r = new Set<InternalWebSocket>()
+      r = new Set<WebSocketHandshakeCompleted>()
       rooms.set(room, r)
     }
     observeRoomCount()
@@ -68,66 +41,63 @@ export function createRoomsComponent(
   // Removes a socket from a room in the data structure and also forwards the
   // message to the rest of the room.
   // Deletes the room if it becomes empty
-  function removeFromRoom(socket: InternalWebSocket) {
-    const roomInstance = getRoom(socket.roomId)
+  function removeFromRoom(socket: WebSocketHandshakeCompleted) {
+    const userData = socket.getUserData()
+    const roomInstance = getRoom(userData.roomId)
     logger.debug('Disconnecting user', {
-      room: socket.roomId,
-      address: socket.address!,
-      alias: socket.alias,
+      room: userData.roomId,
+      address: userData.address,
+      alias: userData.alias,
       count: addressToSocket.size
     })
     roomInstance.delete(socket)
-    if (socket.address) {
-      addressToSocket.delete(socket.address)
+    if (userData.address) {
+      addressToSocket.delete(userData.address)
     }
     if (roomInstance.size === 0) {
       logger.debug('Destroying room', {
-        room: socket.roomId,
+        room: userData.roomId,
         count: rooms.size
       })
-      rooms.delete(socket.roomId)
+      rooms.delete(userData.roomId)
       observeRoomCount()
     }
     observeConnectionCount()
 
-    socket.off('message')
-
     // inform the room about the peer that left it
-    broadcast(
-      socket.roomId,
+    server.app.publish(
+      userData.roomId,
       craftMessage({
         message: {
           $case: 'peerLeaveMessage',
-          peerLeaveMessage: { alias: socket.alias }
+          peerLeaveMessage: { alias: userData.alias }
         }
-      })
+      }),
+      true
     )
   }
 
   // receives an authenticated socket and adds it to a room
-  function addSocketToRoom(ws: InternalWebSocket) {
-    if (!ws.address) throw new Error('Socket did not contain address')
-    if (!ws.roomId) throw new Error('Socket did not contain roomId')
-    if (!ws.alias) throw new Error('Socket did not contain alias')
-
-    const address = ws.address
+  function addSocketToRoom(ws: WebSocketHandshakeCompleted) {
+    const userData = ws.getUserData()
+    const address = userData.address
 
     logger.debug('Connecting user', {
-      room: ws.roomId,
+      room: userData.roomId,
       address,
-      alias: ws.alias
+      alias: userData.alias
     })
 
-    const roomInstance = getRoom(ws.roomId)
+    const roomInstance = getRoom(userData.roomId)
 
     // disconnect previous session
     const kicked = getSocket(address)
 
     if (kicked) {
       logger.info('Kicking user', {
-        room: ws.roomId,
+        room: userData.roomId,
         address,
-        alias: kicked.alias
+        alias: kicked.getUserData().alias
       })
       kicked.send(
         craftMessage({
@@ -141,9 +111,9 @@ export function createRoomsComponent(
       kicked.close()
       removeFromRoom(kicked)
       logger.info('Kicked user', {
-        room: ws.roomId,
+        room: userData.roomId,
         address,
-        alias: kicked.alias
+        alias: kicked.getUserData().alias
       })
       components.metrics.increment('dcl_ws_rooms_kicks_total')
     }
@@ -151,49 +121,6 @@ export function createRoomsComponent(
     // 0. before anything else, add the user to the room and hook the 'close' and 'message' events
     roomInstance.add(ws)
     addressToSocket.set(address, ws)
-    ws.on('error', (err) => {
-      logger.error(err)
-      removeFromRoom(ws)
-    })
-    ws.on('close', () => removeFromRoom(ws))
-    ws.on('message', (data) => {
-      components.metrics.increment('dcl_ws_rooms_in_messages', {})
-      components.metrics.increment('dcl_ws_rooms_in_bytes', {}, data.byteLength)
-
-      // if (!isBinary) {
-      //   logger.log('protocol error: data is not binary')
-      //   return
-      // }
-
-      const { message } = WsPacket.decode(Buffer.from(data))
-
-      if (!message || message.$case !== 'peerUpdateMessage') {
-        // we accept unknown messages to enable protocol extensibility and compatibility.
-        // do NOT kick the users when they send unknown messages
-        components.metrics.increment('dcl_ws_rooms_unknown_sent_messages_total')
-        return
-      }
-
-      const { body, unreliable } = message.peerUpdateMessage
-
-      const subscribers = roomInstance.size
-      components.metrics.increment('dcl_ws_rooms_out_messages', {}, subscribers)
-      components.metrics.increment('dcl_ws_rooms_out_bytes', {}, subscribers * data.byteLength)
-      ws.publish(
-        ws.roomId,
-        craftMessage({
-          message: {
-            $case: 'peerUpdateMessage',
-            peerUpdateMessage: {
-              fromAlias: ws.alias,
-              body,
-              unreliable
-            }
-          }
-        }),
-        true
-      )
-    })
 
     observeConnectionCount()
 
@@ -201,15 +128,16 @@ export function createRoomsComponent(
     //    and disconnect other peers if the address is repeated
     const peerIdentities: Record<number, string> = {}
     for (const peer of roomInstance) {
-      if (peer !== ws && peer.address) {
-        peerIdentities[peer.alias] = peer.address
+      const peerUserData = peer.getUserData()
+      if (peer !== ws && peerUserData.address) {
+        peerIdentities[peerUserData.alias] = peerUserData.address
       }
     }
 
     const welcomeMessage = craftMessage({
       message: {
         $case: 'welcomeMessage',
-        welcomeMessage: { alias: ws.alias, peerIdentities }
+        welcomeMessage: { alias: userData.alias, peerIdentities }
       }
     })
 
@@ -225,11 +153,11 @@ export function createRoomsComponent(
     const joinedMessage = craftMessage({
       message: {
         $case: 'peerJoinMessage',
-        peerJoinMessage: { alias: ws.alias, address }
+        peerJoinMessage: { alias: userData.alias, address }
       }
     })
-    broadcast(ws.roomId, joinedMessage)
-    ws.subscribe(ws.roomId)
+    server.app.publish(userData.roomId, joinedMessage, true)
+    ws.subscribe(userData.roomId)
 
     components.metrics.increment('dcl_ws_rooms_connections_total')
   }
@@ -238,7 +166,7 @@ export function createRoomsComponent(
     return addressToSocket.has(address)
   }
 
-  function getSocket(address: string): InternalWebSocket | undefined {
+  function getSocket(address: string): WebSocketHandshakeCompleted | undefined {
     return addressToSocket.get(address)
   }
 
