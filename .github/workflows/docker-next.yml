@@ -10,5 +10,6 @@ jobs:
     uses: decentraland/platform-actions/.github/workflows/apps-docker-next.yml@main
     with:
       service-name: ws-room-service
+      deployment-environment: dev
       dockerfile-url: https://raw.githubusercontent.com/decentraland/platform-actions/main/Dockerfile.ubuntu
     secrets: inherit

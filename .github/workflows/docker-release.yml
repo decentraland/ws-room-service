@@ -10,5 +10,6 @@ jobs:
     uses: decentraland/platform-actions/.github/workflows/apps-docker-release.yml@main
     with:
       service-name: ws-room-service
+      deployment-environment: prd
       dockerfile-url: https://raw.githubusercontent.com/decentraland/platform-actions/main/Dockerfile.ubuntu
     secrets: inherit
