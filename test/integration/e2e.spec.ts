@@ -358,6 +358,6 @@ function socketSend(socket: WebSocket, message: Uint8Array): Promise<void> {
 function futureWithTimeout<T = any>(ms: number, message = 'Timed out') {
   const fut = future<T>()
   const t = setTimeout(() => fut.reject(new Error(message)), ms)
-  fut.finally(() => clearTimeout(t))
+  fut.finally(() => clearTimeout(t)).catch(console.error)
   return fut
 }
