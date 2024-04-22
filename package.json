@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@dcl/crypto": "^3.4.5",
-    "@dcl/protocol": "^1.0.0-7716486147.commit-7433b10",
+    "@dcl/protocol": "^1.0.0-8758013256.commit-44aab53",
     "@dcl/schemas": "^10.3.0",
     "@well-known-components/env-config-provider": "^1.2.0",
     "@well-known-components/fetch-component": "^2.0.2",
