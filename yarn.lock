@@ -335,10 +335,10 @@
     eslint-plugin-prettier "^5.1.3"
     prettier "^3.2.4"
 
-"@dcl/protocol@^1.0.0-7716486147.commit-7433b10":
-  version "1.0.0-7716486147.commit-7433b10"
-  resolved "https://registry.yarnpkg.com/@dcl/protocol/-/protocol-1.0.0-7716486147.commit-7433b10.tgz#a33d44f3c23fa290620e50e2445e5625e351cd1c"
-  integrity sha512-wlFfSR0612R0vJndjjLEwf1wrpVSORDn2rRPxwKenrMZxv+e26ITwB8qA1bxVzcM3/vfJCnZlWgcLrigjlHiGg==
+"@dcl/protocol@^1.0.0-8879141840.commit-9fe6ed4":
+  version "1.0.0-8879141840.commit-9fe6ed4"
+  resolved "https://registry.yarnpkg.com/@dcl/protocol/-/protocol-1.0.0-8879141840.commit-9fe6ed4.tgz#24e28e5d9c070970569070bbb7c2056f145ce078"
+  integrity sha512-m208kiWhSWHiQqJXsMbaNI1S7++ZBufL+avKOVQ3c+Tebqx9vK7hMelnwR4Xpy1a7ngBaZA4f+9NwfUsnN5A8Q==
   dependencies:
     "@dcl/ts-proto" "1.154.0"
 
